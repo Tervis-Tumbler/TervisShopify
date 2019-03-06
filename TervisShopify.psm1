@@ -1,5 +1,9 @@
 #Requires -Modules ShopifyPowerShell,TervisPowershellJobs,TervisPasswordstatePowerShell
 
-Set-GetShopifyCredentialScriptBlock -ScriptBlock {
-    Get-PasswordstatePassword -AsCredential -ID 5729
+function Set-TervisShopifyCredential {
+    $Credential = Get-PasswordstatePassword -ID 5729 | Select-Object UserName, Password
+    Set-ShopifyCredential -Credential $Credential
+}
+function Set-TervisShopifyEnvironment {
+    Set-TervisShopifyCredential
 }
