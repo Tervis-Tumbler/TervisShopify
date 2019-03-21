@@ -2,12 +2,17 @@
 
 Set-TervisShopifyEnvironment
 
-function Set-TervisShopifyCredential {
-    $Credential = Get-TervisPasswordstatePassword -Guid "4acc9b2a-080f-4f58-8cbd-843bcbc6d4ab" -AsCredential
-    Set-ShopifyCredential -Credential $Credential
-}
 function Set-TervisShopifyEnvironment {
-    Set-TervisShopifyCredential
+    param (
+        [Parameter(Mandatory)]
+        [ValidateSet("DEV","PRD")]$Environment
+    )
+    $GUID = @{
+        DEV = "4acc9b2a-080f-4f58-8cbd-843bcbc6d4ab"
+        PRD = "a8957c55-9337-4b94-9469-81b06328a9f6"
+    }
+    $Credential = Get-TervisPasswordstatePassword -Guid $GUID[$Environment] -AsCredential
+    Set-ShopifyCredential -Credential $Credential
 }
 
 function New-TervisShopifyProduct {
