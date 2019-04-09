@@ -56,3 +56,23 @@ function New-TervisShopifyImage {
 
     Invoke-ShopifyRestAPIFunction -HttpMethod POST -ShopName ospreystoredev -Resource Products -Subresource "$ProductId/images" -Body $Body
 }
+
+function Update-TervisShopifyItemToBePOSReady {
+    param (
+        [Parameter(Mandatory,ValueFromPipeline)]$Product,
+        [Parameter(Mandatory)]$ShopName
+    )
+    begin {
+        $Locations = Get-ShopifyRestLocations -ShopName $ShopName
+    }
+    process {
+        $InventoryItemId = $Product.Variants.Inventory_Item_ID
+        $ProductVariantId = $Product.Variants.ID
+        
+        foreach ($LocationId in $Locations.id) {
+            Invoke-ShopifyInventoryActivate -InventoryItemId $InventoryItemId -LocationId $LocationId -ShopName $ShopName
+        }
+        Set-ShopifyRestProductChannel -ShopName $ShopName -Products $Product -Channel global
+        Set-ShopifyProductVariantInventoryPolicy -ProductVariantId $ProductVariantId -InventoryPolicy "CONTINUE" -ShopName $ShopName
+    }
+}
