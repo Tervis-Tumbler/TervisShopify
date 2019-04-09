@@ -68,11 +68,11 @@ function Update-TervisShopifyItemToBePOSReady {
     process {
         $InventoryItemId = $Product.Variants.Inventory_Item_ID
         $ProductVariantId = $Product.Variants.ID
-        
+
         foreach ($LocationId in $Locations.id) {
-            Invoke-ShopifyInventoryActivate -InventoryItemId $InventoryItemId -LocationId $LocationId -ShopName $ShopName
+            Invoke-ShopifyInventoryActivate -InventoryItemId $InventoryItemId -LocationId $LocationId -ShopName $ShopName | Out-Null
         }
-        Set-ShopifyRestProductChannel -ShopName $ShopName -Products $Product -Channel global
-        Set-ShopifyProductVariantInventoryPolicy -ProductVariantId $ProductVariantId -InventoryPolicy "CONTINUE" -ShopName $ShopName
+        Set-ShopifyRestProductChannel -ShopName $ShopName -Products $Product -Channel global | Out-Null
+        Set-ShopifyProductVariantInventoryPolicy -ProductVariantId $ProductVariantId -InventoryPolicy "CONTINUE" -ShopName $ShopName | Out-Null
     }
 }
