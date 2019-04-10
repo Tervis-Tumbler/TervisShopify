@@ -76,3 +76,46 @@ function Update-TervisShopifyItemToBePOSReady {
         Set-ShopifyProductVariantInventoryPolicy -ProductVariantId $ProductVariantId -InventoryPolicy "CONTINUE" -ShopName $ShopName | Out-Null
     }
 }
+
+function Get-TervisShopifyProductInventoryLocations {
+    param (
+        [Parameter(Mandatory)]$ProductId,
+        [Parameter(Mandatory)]$ShopName
+    )
+
+    $Query = @"
+        query GetProductLocations {
+            productVariants(first:1, query:"product_id:$ProductId") {
+                edges {
+                    node {
+                        product {
+                            title
+                        }
+                        inventoryItem {
+                            ...locationInfo
+                        }
+                    }
+                }
+            }
+        }
+
+        fragment locationInfo on InventoryItem {
+            inventoryLevels(first: 4) {
+                edges {
+                    node {
+                        location {
+                            name
+                        }
+                    }
+                }
+            }
+        }
+"@
+    
+    $Response = Invoke-ShopifyAPIFunction -ShopName $ShopName -Body $Query
+    return [PSCustomObject]@{
+        ProductId = $ProductId
+        ProductTitle = $Response.data.productVariants.edges.node.product.title
+        Locations = $Response.data.productVariants.edges.node.inventoryItem.inventoryLevels.edges.node.location.name
+    }
+}
