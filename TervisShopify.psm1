@@ -60,20 +60,34 @@ function New-TervisShopifyImage {
 function Update-TervisShopifyItemToBePOSReady {
     param (
         [Parameter(Mandatory,ValueFromPipeline)]$Product,
-        [Parameter(Mandatory)]$ShopName
+        [Parameter(Mandatory)]$ShopName,
+        $OutputPath
     )
     begin {
         $Locations = Get-ShopifyRestLocations -ShopName $ShopName
+
+        # Logging 
+        $InventoryLevel = @()
+        $SalesChannel = @()
+        $InventoryPolicy = @()
     }
     process {
         $InventoryItemId = $Product.Variants.Inventory_Item_ID
         $ProductVariantId = $Product.Variants.ID
 
         foreach ($LocationId in $Locations.id) {
-            Invoke-ShopifyInventoryActivate -InventoryItemId $InventoryItemId -LocationId $LocationId -ShopName $ShopName | Out-Null
+            $InventoryLevel += Invoke-ShopifyInventoryActivate -InventoryItemId $InventoryItemId -LocationId $LocationId -ShopName $ShopName
         }
-        Set-ShopifyRestProductChannel -ShopName $ShopName -Products $Product -Channel global | Out-Null
-        Set-ShopifyProductVariantInventoryPolicy -ProductVariantId $ProductVariantId -InventoryPolicy "CONTINUE" -ShopName $ShopName | Out-Null
+        $SalesChannel += Set-ShopifyRestProductChannel -ShopName $ShopName -Products $Product -Channel global
+        $InventoryPolicy += Set-ShopifyProductVariantInventoryPolicy -ProductVariantId $ProductVariantId -InventoryPolicy "CONTINUE" -ShopName $ShopName
+    }
+    end {
+        if ($OutputPath) {
+            $DateStamp = Get-Date -Format "yyyyMMdd-hhmmss"
+            $InventoryLevel | ConvertTo-Json -Depth 15 -Compress | Out-File -FilePath "$OutputPath/$DateStamp`_InventoryLevel.json"
+            $SalesChannel | ConvertTo-Json -Depth 15 -Compress | Out-File -FilePath "$OutputPath/$DateStamp`_SalesChannel.json"
+            $InventoryPolicy | ConvertTo-Json -Depth 15 -Compress | Out-File -FilePath "$OutputPath/$DateStamp`_InventoryPolicy.json"
+        }
     }
 }
 
@@ -118,4 +132,47 @@ function Get-TervisShopifyProductInventoryLocations {
         ProductTitle = $Response.data.productVariants.edges.node.product.title
         Locations = $Response.data.productVariants.edges.node.inventoryItem.inventoryLevels.edges.node.location.name
     }
+}
+
+function Get-TervisShopifyProductsAtLocation {
+    param (
+        [Parameter(Mandatory)]$LocationName,
+        [Parameter(Mandatory)]$ShopName
+    )
+    $Products = @()
+    $CurrentCursor = ""
+    
+    do {
+        $Query = @"
+            query LocationStuff {
+                locations(first: 1, query: "name:$LocationName") {
+                    edges {
+                        node {
+                            inventoryLevels(first: 245 $(if ($CurrentCursor) {", after:`"$CurrentCursor`""} )) {
+                                edges {
+                                    node {
+                                        item {
+                                            variant {
+                                                product {
+                                                    title
+                                                }
+                                            }
+                                        }
+                                    }
+                                    cursor
+                                }
+                                pageInfo {
+                                    hasNextPage
+                                }
+                            }
+                        }
+                    }
+                }
+            }    
+"@   
+        $Response = Invoke-ShopifyAPIFunction -ShopName $ShopName -Body $Query
+        $CurrentCursor = $Response.data.locations.edges.node.inventoryLevels.edges | Select-Object -Last 1 -ExpandProperty cursor
+        $Products += $Response.data.locations.edges.node.inventoryLevels.edges | ForEach-Object {$_.node.item.variant.product.title}
+    } while ($Response.data.locations.edges.node.inventoryLevels.pageInfo.hasNextPage)
+    return $Products
 }
