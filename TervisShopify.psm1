@@ -45,7 +45,8 @@ function New-TervisShopifyImage {
     # Does not work currently
     param (
         [Parameter(Mandatory)]$ImageUrl,
-        [Parameter(Mandatory)]$ProductId
+        [Parameter(Mandatory)]$ProductId,
+        [Parameter(Mandatory)]$ShopName
     )
     
     $Body = @{
@@ -54,7 +55,7 @@ function New-TervisShopifyImage {
         }
     } | ConvertTo-Json -Compress
 
-    Invoke-ShopifyRestAPIFunction -HttpMethod POST -ShopName ospreystoredev -Resource Products -Subresource "$ProductId/images" -Body $Body
+    Invoke-ShopifyRestAPIFunction -HttpMethod POST -ShopName $ShopName -Resource Products -Subresource "$ProductId/images" -Body $Body
 }
 
 function Update-TervisShopifyItemToBePOSReady {
