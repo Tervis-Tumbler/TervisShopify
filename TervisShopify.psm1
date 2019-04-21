@@ -27,18 +27,38 @@ function New-TervisShopifyProduct {
         $ShopName = "ospreystoredev"
     )
 
-    $Params = @{
-        ShopName = $ShopName
-        Title = $Title
-        Body_HTML = $Description
-        SKU = $EBSItemNumber
-        Barcode = $UPC
-        Price = $Price
-        Inventory_Quantity = $InventoryQuantity
-        Published_Scope = $PublishedScope
-    }
+    # $Params = @{
+    #     ShopName = $ShopName
+    #     Title = $Title
+    #     Body_HTML = $Description
+    #     SKU = $EBSItemNumber
+    #     Barcode = $UPC
+    #     Price = $Price
+    #     Inventory_Quantity = $InventoryQuantity
+    #     Published_Scope = $PublishedScope
+    # }
 
-    New-ShopifyRestProduct @Params
+    # New-ShopifyRestProduct @Params
+
+    $Body = [PSCustomObject]@{
+        product = @{
+            title = $Title
+            # body_html = $Body_HTML
+            published_scope = $Published_Scope
+            variants = @(
+                @{
+                    price = $Price
+                    sku = $SKU
+                    barcode = $Barcode
+                    inventory_quantity = $Inventory_Quantity
+                }
+            )
+        }
+    } | ConvertTo-Json -Compress -Depth 3
+
+    Invoke-ShopifyRestAPIFunction -HttpMethod Post -Resource Products -ShopName $ShopName -Body $Body
+
+
 }
 
 function Update-TervisShopifyItemToBePOSReady {
@@ -54,6 +74,7 @@ function Update-TervisShopifyItemToBePOSReady {
         $InventoryLevel = @()
         $SalesChannel = @()
         $InventoryPolicy = @()
+        $Image = @()
     }
     process {
         $InventoryItemId = $Product.Variants.Inventory_Item_ID
@@ -64,6 +85,7 @@ function Update-TervisShopifyItemToBePOSReady {
         }
         $SalesChannel += Set-ShopifyRestProductChannel -ShopName $ShopName -Products $Product -Channel global
         $InventoryPolicy += Set-ShopifyProductVariantInventoryPolicy -ProductVariantId $ProductVariantId -InventoryPolicy "CONTINUE" -ShopName $ShopName
+        $Image = $Product | Add-TervisShopifyImageToProduct -ShopName $ShopName
     }
     end {
         if ($OutputPath) {
@@ -71,6 +93,7 @@ function Update-TervisShopifyItemToBePOSReady {
             $InventoryLevel | ConvertTo-Json -Depth 15 -Compress | Out-File -FilePath "$OutputPath/$DateStamp`_InventoryLevel.json"
             $SalesChannel | ConvertTo-Json -Depth 15 -Compress | Out-File -FilePath "$OutputPath/$DateStamp`_SalesChannel.json"
             $InventoryPolicy | ConvertTo-Json -Depth 15 -Compress | Out-File -FilePath "$OutputPath/$DateStamp`_InventoryPolicy.json"
+            $Image | ConvertTo-Json -Depth 15 -Compress | Out-File -FilePath "$OutputPath/$DateStamp`_Image.json"
         }
     }
 }
@@ -160,3 +183,18 @@ function Get-TervisShopifyProductsAtLocation {
     } while ($Response.data.locations.edges.node.inventoryLevels.pageInfo.hasNextPage)
     return $Products
 }
+
+function Add-TervisShopifyImageToProduct {
+    param (
+        [Parameter(Mandatory)]$ShopName,
+        [Parameter(Mandatory,ValueFromPipeline)]$Product
+    )
+    process {
+        $ProductId = $Product.variants.sku
+        $Scene7Url = Invoke-EBSSQL -SQLCommand "SELECT * FROM xxtrvs.XXTRVS_DW_CATALOG_INTF WHERE Product_Id = $ProductId" | Select-Object -ExpandProperty SGURL
+        $ImageUrl = "https://images.tervis.com/is/image/$Scene7Url"
+        New-ShopifyImageByURL -ImageUrl $ImageUrl -ProductId $Product.Id -ShopName $ShopName
+    }
+}
+
+
