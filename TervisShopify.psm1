@@ -197,4 +197,51 @@ function Add-TervisShopifyImageToProduct {
     }
 }
 
+function ConvertTo-IndexedArray {
+    param (
+        [Parameter(Mandatory)]$InputObject,
+        [Parameter(Mandatory)]$NumberedPropertyToIndex
+    )
+    # Get max value to determine size of array
+    $MaxValue = $InputObject.$NumberedPropertyToIndex | 
+        ForEach-Object {
+            try {
+                [int]::Parse($_)
+            } catch {
+                $NonIntWarning = $true
+            }
+        } |
+        Measure-Object -Maximum | 
+        Select-Object -ExpandProperty Maximum
+    if (($MaxValue + 1) -gt [int]::MaxValue) {
+        throw "Largest value is larger than the maximum array length."
+    }
+    if ($NonIntWarning) {
+        Write-Warning "There are values that cannot be converted to an integer."
+    }
+
+    # Add values to array by prop's number
+    $Array = [System.Object[]]::new($MaxValue + 1)
+    $InputObject | ForEach-Object {
+        try {
+            $Index = [int]::Parse($_.$NumberedPropertyToIndex)
+            $Array[$Index] = $_
+        } catch {}
+    }
+    $Array
+}
+
+function Get-NonIntegerValues {
+    param (
+        [Parameter(Mandatory,ValueFromPipeline)]$InputObject
+    )
+    process {
+        try {
+            [int]::Parse($InputObject) | Out-Null
+        }
+        catch {
+            $InputObject
+        }
+    }
+}
 
