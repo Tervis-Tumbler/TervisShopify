@@ -245,6 +245,20 @@ function Get-NonIntegerValues {
     }
 }
 
+function Find-ObjectsWithNonIntegerValuesInProperty {
+    param (
+        [Parameter(Mandatory,ValueFromPipeline)]$InputObject,
+        [Parameter(Mandatory)]$Property
+    )
+    process {
+        try {
+            [int]::Parse($InputObject.$Property) | Out-Null
+        } catch {
+            $InputObject
+        }
+    }
+}
+
 function Get-TervisShopifyPricesFromRMSSQL {
     param (
         [Parameter(Mandatory)]$Server,
@@ -276,15 +290,12 @@ function Get-TervisShopifyDataFromEBS {
     )
     $Query = @"
         SELECT
-            items.SEGMENT1 AS PRODUCT_ID,
+            items.SEGMENT1 AS ITEM_NUMBER,
             items.INVENTORY_ITEM_ID,
             items.DESCRIPTION,
             xref.CROSS_REFERENCE AS UPC,
-            items.ORGANIZATION_ID,
-            items.INVENTORY_ITEM_STATUS_CODE,  
-            xref.CROSS_REFERENCE_TYPE,
             cat.SGURL AS IMG_URL,
-            items.LAST_UPDATE_DATE AS LAST_UPDATE
+            items.LAST_UPDATE_DATE
         FROM mtl_system_items_b items
         LEFT JOIN apps.mtl_cross_references xref ON items.INVENTORY_ITEM_ID = xref.INVENTORY_ITEM_ID
         LEFT JOIN XXTRVS.XXTRVS_DW_CATALOG_INTF cat ON items.SEGMENT1 = cat.PRODUCT_ID
@@ -294,4 +305,31 @@ function Get-TervisShopifyDataFromEBS {
 "@
     Set-TervisEBSEnvironment -Name $Environment
     Invoke-EBSSQL -SQLCommand $Query
+}
+
+function New-TervisShopifyInitialUploadData {
+    [CmdletBinding()] param ()
+    Write-Verbose "Getting SQL data"
+    $RMSAccess = Get-TervisPasswordstatePassword -Guid "000108ef-95f8-4232-a62d-97d8c69e0b9f" -AsCredential
+    $RMSData = Get-TervisShopifyPricesFromRMSSQL -Server $RMSAccess.Username -Database $RMSAccess.GetNetworkCredential().Password
+    $EBSData = Get-TervisShopifyDataFromEBS
+
+    Write-Verbose "Indexing SQL data"
+    $IndexedRMSData_1 = ConvertTo-IndexedArray -InputObject $RMSData -NumberedPropertyToIndex "EBSItemNumber"
+    $IndexedRMSData_2 = $RMSData | Find-ObjectsWithNonIntegerValuesInProperty -Property EBSItemNumber | ConvertTo-IndexedHashtable -PropertyToIndex EBSItemNumber
+    
+    Write-Verbose "Generating Shopify data"
+    $EBSData | ForEach-Object {
+        $Price = if ($IndexedRMSData_1[$_.Item_Number]) {
+                $IndexedRMSData_1[$_.Item_Number].Price
+            } else {$IndexedRMSData_2["$($_.Item_Number)"].Price}
+        [PSCustomObject]@{
+            EBSItemNumber = $_.Item_Number
+            EBSInventoryItemId = $_.Inventory_Item_Id
+            Description = $_.Description
+            Price = $Price
+            UPC = $_.UPC
+            ImageURL = "https://images.tervis.com/is/image/" + $_.Img_Url
+        }
+    }
 }
