@@ -80,12 +80,18 @@ function Update-TervisShopifyItemToBePOSReady {
         $InventoryItemId = $Product.Variants.Inventory_Item_ID
         $ProductVariantId = $Product.Variants.ID
 
-        foreach ($LocationId in $Locations.id) {
-            $InventoryLevel += Invoke-ShopifyInventoryActivate -InventoryItemId $InventoryItemId -LocationId $LocationId -ShopName $ShopName
+        # foreach ($LocationId in $Locations.id) {
+        #     $InventoryLevel += Invoke-ShopifyInventoryActivate -InventoryItemId $InventoryItemId -LocationId $LocationId -ShopName $ShopName
+        # }
+        if ($Product.published_scope -ne "global") {
+            $SalesChannel += Set-ShopifyRestProductChannel -ShopName $ShopName -Products $Product -Channel global
         }
-        $SalesChannel += Set-ShopifyRestProductChannel -ShopName $ShopName -Products $Product -Channel global
-        $InventoryPolicy += Set-ShopifyProductVariantInventoryPolicy -ProductVariantId $ProductVariantId -InventoryPolicy "CONTINUE" -ShopName $ShopName
-        $Image = $Product | Add-TervisShopifyImageToProduct -ShopName $ShopName
+        if ($Product.variants.inventory_policy -ne "continue") {
+            $InventoryPolicy += Set-ShopifyProductVariantInventoryPolicy -ProductVariantId $ProductVariantId -InventoryPolicy "CONTINUE" -ShopName $ShopName
+        }
+        if (-not $Product.Image) {
+            $Image = $Product | Add-TervisShopifyImageToProduct -ShopName $ShopName
+        }
     }
     end {
         if ($OutputPath) {
