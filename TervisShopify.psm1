@@ -269,3 +269,29 @@ function Get-TervisShopifyPricesFromRMSSQL {
 
     Invoke-MSSQL @PSBoundParameters -SQLCommand $query -ConvertFromDataRow
 }
+
+function Get-TervisShopifyDataFromEBS {
+    param (
+        $Environment = "Production"
+    )
+    $Query = @"
+        SELECT
+            items.SEGMENT1 AS PRODUCT_ID,
+            items.INVENTORY_ITEM_ID,
+            items.DESCRIPTION,
+            xref.CROSS_REFERENCE AS UPC,
+            items.ORGANIZATION_ID,
+            items.INVENTORY_ITEM_STATUS_CODE,  
+            xref.CROSS_REFERENCE_TYPE,
+            cat.SGURL AS IMG_URL,
+            items.LAST_UPDATE_DATE AS LAST_UPDATE
+        FROM mtl_system_items_b items
+        LEFT JOIN apps.mtl_cross_references xref ON items.INVENTORY_ITEM_ID = xref.INVENTORY_ITEM_ID
+        LEFT JOIN XXTRVS.XXTRVS_DW_CATALOG_INTF cat ON items.SEGMENT1 = cat.PRODUCT_ID
+        WHERE xref.CROSS_REFERENCE_TYPE = 'UPC' 
+        AND items.ORGANIZATION_ID = 85
+        AND items.INVENTORY_ITEM_STATUS_CODE IN ('Active','DTCDeplete')
+"@
+    Set-TervisEBSEnvironment -Name $Environment
+    Invoke-EBSSQL -SQLCommand $Query
+}
