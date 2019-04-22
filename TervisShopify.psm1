@@ -346,7 +346,8 @@ function ConvertTo-ShopifyHandle {
 function Export-TervisShopifyCSV {
     param (
         [Parameter(Mandatory,ValueFromPipeline)]$ShopifyUploadData,
-        [Parameter(Mandatory)]$Path
+        [Parameter(Mandatory)]$DirectoryPath,
+        $ItemsPerCSV
     )
     begin {
         $CSVData = [System.Collections.ArrayList]::new()
@@ -401,9 +402,15 @@ function Export-TervisShopifyCSV {
             "Variant Image" = ""
             "Variant Weight Unit" = "lb"
             "Cost per item" = ""
-        })
+        }) | Out-Null
     }
     end {
-        $CSVData | Export-Csv -Path $Path -Encoding UTF8 -NoTypeInformation
+        if ($ItemsPerCSV) {
+            for ($i = 0; $i -lt $CSVData.Count; $i += $ItemsPerCSV) {
+                $CSVData | Select-Object -Skip $i -First $ItemsPerCSV | Export-Csv -Path "$DirectoryPath\ShopifyUpload_Start_$i.csv" -Encoding UTF8 -NoTypeInformation -Force
+            } 
+        } else {
+            $CSVData | Export-Csv -Path "$DirectoryPath\ShopifyUpload.csv" -Encoding UTF8 -NoTypeInformation -Force
+        }
     }
 }
