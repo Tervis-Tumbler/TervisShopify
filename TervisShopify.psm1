@@ -329,7 +329,16 @@ function New-TervisShopifyInitialUploadData {
             Description = $_.Description
             Price = $Price
             UPC = $_.UPC
-            ImageURL = "https://images.tervis.com/is/image/" + $_.Img_Url
+            ImageURL = if ($_.Img_Url) {"https://images.tervis.com/is/image/" + $_.Img_Url} else {""}
         }
+    }
+}
+
+function ConvertTo-ShopifyHandle {
+    param (
+        [Parameter(Mandatory,ValueFromPipeline)]$String
+    )
+    process {
+        $String -replace "[^\w|^\d]+","-"
     }
 }
