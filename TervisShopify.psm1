@@ -428,13 +428,15 @@ function Invoke-TervisShopifyContinuousUpdate {
     )
 
     $Products = Get-ShopifyRestProductsAll -ShopName $ShopName
-    
+
     do {
-        Write-Verbose "Current count: $($Products.Length)"
+        $CurrentCount = $Products.Length
+        Write-Verbose "Current count: $CurrentCount"
         $Products | Update-TervisShopifyItemToBePOSReady -ShopName $ShopName
         $Products = Get-ShopifyRestProductsAll -ShopName $ShopName
-        Write-Verbose "Next round count: $($Products.Length)"
+        $NextRoundCount = $Products.Length
+        Write-Verbose "Next round count: $NextRoundCount"
     } while (
-        $Count -gt $Products.Count
+        $NextRoundCount -gt $CurrentCount
     )
 }
