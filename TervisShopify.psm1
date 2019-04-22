@@ -245,3 +245,27 @@ function Get-NonIntegerValues {
     }
 }
 
+function Get-TervisShopifyPricesFromRMSSQL {
+    param (
+        [Parameter(Mandatory)]$Server,
+        [Parameter(Mandatory)]$Database
+    )
+    $query = @"
+        SELECT * FROM (
+            SELECT Alias.Alias AS EBSItemNumber 
+            , Item.ItemLookupCode AS ItemUPC
+                , Item.Description
+                , Item.Price
+                , Item.DBTimeStamp
+                , ROW_NUMBER() OVER (PARTITION BY Alias.Alias ORDER BY Item.DBTimeStamp DESC) AS RN
+            FROM Item, Alias WITH (NOLOCK)
+            WHERE Item.ID = Alias.ItemID
+            AND Item.Inactive = 0
+            AND Item.ItemLookupCode != Alias.Alias
+        )  AS WINDOW
+        WHERE RN = 1
+        ORDER BY EBSItemNumber
+"@
+
+    Invoke-MSSQL @PSBoundParameters -SQLCommand $query -ConvertFromDataRow
+}
