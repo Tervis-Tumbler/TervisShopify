@@ -342,3 +342,68 @@ function ConvertTo-ShopifyHandle {
         $String -replace "[^\w|^\d]+","-"
     }
 }
+
+function Export-TervisShopifyCSV {
+    param (
+        [Parameter(Mandatory,ValueFromPipeline)]$ShopifyUploadData,
+        [Parameter(Mandatory)]$Path
+    )
+    begin {
+        $CSVData = [System.Collections.ArrayList]::new()
+    }
+    process {
+        $Price = try {
+            $ShopifyUploadData.Price.ToString("#.##")
+        } catch {"0.00"}
+        $CSVData.Add([PSCustomObject]@{
+            "Handle" = $ShopifyUploadData.Description | ConvertTo-ShopifyHandle
+            "Title" = $ShopifyUploadData.Description
+            "Body (HTML)" = $ShopifyUploadData.Description
+            "Vendor" = "Tervis"
+            "Type" = ""
+            "Tags" = ""
+            "Published" = "TRUE"
+            "Option1 Name" = "Title"
+            "Option1 Value" = "Default Title"
+            "Option2 Name" = ""
+            "Option2 Value" = ""
+            "Option3 Name" = ""
+            "Option3 Value" = ""
+            "Variant SKU" = $ShopifyUploadData.EBSItemNumber
+            "Variant Grams" = "0"
+            "Variant Inventory Tracker" = "shopify"
+            "Variant Inventory Policy" = "continue"
+            "Variant Fulfillment Service" = "manual"
+            "Variant Price" = $Price
+            "Variant Compare At Price" = ""
+            "Variant Requires Shipping" = ""
+            "Variant Taxable" = "TRUE"
+            "Variant Barcode" = $ShopifyUploadData.UPC
+            "Image Src" = $ShopifyUploadData.ImageURL
+            "Image Position" = ""
+            "Image Alt Text" = ""
+            "Gift Card" = ""
+            "Google Shopping / MPN" = ""
+            "Google Shopping / Age Group" = ""
+            "Google Shopping / Gender" = ""
+            "Google Shopping / Google Product Category" = ""
+            "SEO Title" = ""
+            "SEO Description" = ""
+            "Google Shopping / AdWords Grouping" = ""
+            "Google Shopping / AdWords Labels" = ""
+            "Google Shopping / Condition" = ""
+            "Google Shopping / Custom Product" = ""
+            "Google Shopping / Custom Label 0" = ""
+            "Google Shopping / Custom Label 1" = ""
+            "Google Shopping / Custom Label 2" = ""
+            "Google Shopping / Custom Label 3" = ""
+            "Google Shopping / Custom Label 4" = ""
+            "Variant Image" = ""
+            "Variant Weight Unit" = "lb"
+            "Cost per item" = ""
+        })
+    }
+    end {
+        $CSVData | Export-Csv -Path $Path -Encoding UTF8 -NoTypeInformation
+    }
+}
