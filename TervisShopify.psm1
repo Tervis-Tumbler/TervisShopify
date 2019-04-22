@@ -69,7 +69,7 @@ function Update-TervisShopifyItemToBePOSReady {
     )
     begin {
         $Locations = Get-ShopifyRestLocations -ShopName $ShopName
-
+        Set-TervisEBSEnvironment -Name Production
         # Logging 
         $InventoryLevel = @()
         $SalesChannel = @()
@@ -419,4 +419,22 @@ function Export-TervisShopifyCSV {
             $CSVData | Export-Csv -Path "$DirectoryPath\ShopifyUpload.csv" -Encoding UTF8 -NoTypeInformation -Force
         }
     }
+}
+
+function Invoke-TervisShopifyContinuousUpdate {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory)]$ShopName
+    )
+
+    $Products = Get-ShopifyRestProductsAll -ShopName $ShopName
+    
+    do {
+        Write-Verbose "Current count: $($Products.Length)"
+        $Products | Update-TervisShopifyItemToBePOSReady -ShopName $ShopName
+        $Products = Get-ShopifyRestProductsAll -ShopName $ShopName
+        Write-Verbose "Next round count: $($Products.Length)"
+    } while (
+        $Count -gt $Products.Count
+    )
 }
