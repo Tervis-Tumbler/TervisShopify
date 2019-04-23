@@ -197,9 +197,17 @@ function Add-TervisShopifyImageToProduct {
     )
     process {
         $ProductId = $Product.variants.sku
-        $Scene7Url = Invoke-EBSSQL -SQLCommand "SELECT * FROM xxtrvs.XXTRVS_DW_CATALOG_INTF WHERE Product_Id = $ProductId" | Select-Object -ExpandProperty SGURL
-        $ImageUrl = "https://images.tervis.com/is/image/$Scene7Url"
-        New-ShopifyImageByURL -ImageUrl $ImageUrl -ProductId $Product.Id -ShopName $ShopName
+        try {
+            $Scene7Url = Invoke-EBSSQL -SQLCommand "SELECT SGURL FROM xxtrvs.XXTRVS_DW_CATALOG_INTF WHERE Product_Id = '$ProductId'" -ErrorAction Stop | Select-Object -ExpandProperty SGURL
+        } catch {
+            Write-Warning "Could not retrieve image URL from EBS"
+        }
+        if ($Scene7Url) {            
+            $ImageUrl = "https://images.tervis.com/is/image/$Scene7Url"
+            New-ShopifyImageByURL -ImageUrl $ImageUrl -ProductId $Product.Id -ShopName $ShopName
+        } else {
+            # Write-Warning "No image URL for EBS item number $ProductId"
+        }
     }
 }
 
