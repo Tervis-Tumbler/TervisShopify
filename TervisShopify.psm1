@@ -1,6 +1,6 @@
 #Requires -Modules ShopifyPowerShell,TervisPowershellJobs,TervisPasswordstatePowerShell
 
-Set-TervisShopifyEnvironment
+# Set-TervisShopifyEnvironment
 
 function Set-TervisShopifyEnvironment {
     param (
