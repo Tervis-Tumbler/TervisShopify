@@ -448,3 +448,13 @@ function Invoke-TervisShopifyContinuousUpdate {
         $NextRoundCount -gt $CurrentCount
     )
 }
+
+function Get-TervisShopifyLocationDefinition {
+    $ModulePath = if ($PSScriptRoot) {
+        $PSScriptRoot
+    } else {
+        (Get-Module -ListAvailable TervisShopify).ModuleBase
+    }
+    . $ModulePath\LocationDefinition.ps1
+    $LocationDefinition
+}
