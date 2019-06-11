@@ -1,4 +1,4 @@
-$LocationDefinitions = [PSCustomObject]@{
+$LocationDefinition = [PSCustomObject]@{
     SecondaryInventoryName = "FL1"
     RMSStoreNumber = 1010
     Description = "Tervis Factory Store - Osprey, FL"
