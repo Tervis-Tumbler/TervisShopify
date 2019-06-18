@@ -239,8 +239,8 @@ $LocationDefinition = [PSCustomObject]@{
     PostalCode = "23185"
     PhoneNumber = "757-229-0907"
 },    [PSCustomObject]@{
-    SecondaryInventoryName = "FL0"
-    RMSStoreNumber = 1001
+    SecondaryInventoryName = "FL1"
+    RMSStoreNumber = 1010
     Description = "Tervis Headquarters - Nokomis, FL"
     AddressLine1 = "201 Triple Diamond Blvd"
     AddressLine2 = ""
@@ -248,4 +248,5 @@ $LocationDefinition = [PSCustomObject]@{
     State = "FL"
     PostalCode = "34275"
     PhoneNumber = "941-966-2114"
+    CustomerNumber = "376088"
 }
