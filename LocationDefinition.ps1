@@ -8,6 +8,7 @@ $LocationDefinition = [PSCustomObject]@{
     State = "FL"
     PostalCode = "34229-9218"
     PhoneNumber = "941-966-8614"
+    CustomerNumber = "376088"
 },    [PSCustomObject]@{
     SecondaryInventoryName = "FL11"
     RMSStoreNumber = 3035
@@ -245,6 +246,17 @@ $LocationDefinition = [PSCustomObject]@{
     AddressLine1 = "201 Triple Diamond Blvd"
     AddressLine2 = ""
     City = "Nokomis"
+    State = "FL"
+    PostalCode = "34275"
+    PhoneNumber = "941-966-2114"
+    CustomerNumber = "376088"
+},    [PSCustomObject]@{
+    SecondaryInventoryName = "FL1"
+    RMSStoreNumber = 1010
+    Description = "Tervis Headquarters - Nokomis, FL"
+    AddressLine1 = "201 Triple Diamond Blvd"
+    AddressLine2 = ""
+    City = "North Venice"
     State = "FL"
     PostalCode = "34275"
     PhoneNumber = "941-966-2114"
