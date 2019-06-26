@@ -474,6 +474,7 @@ function Get-TervisShopifyOrdersNotTaggedWithEBS {
                 edges {
                     node {
                         id
+                        legacyResourceId
                         createdAt
                         tags
                         physicalLocation {
@@ -490,6 +491,13 @@ function Get-TervisShopifyOrdersNotTaggedWithEBS {
                                     originalUnitPriceSet {
                                         shopMoney {
                                             amount
+                                        }
+                                    }
+                                    taxLines {
+                                        priceSet {
+                                            shopMoney {
+                                                amount
+                                            }
                                         }
                                     }
                                 }
