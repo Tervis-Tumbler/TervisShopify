@@ -450,13 +450,17 @@ function Invoke-TervisShopifyContinuousUpdate {
 }
 
 function Get-TervisShopifyLocationDefinition {
+    param (
+        [Parameter(Mandatory)]$City
+    )
+    
     $ModulePath = if ($PSScriptRoot) {
         $PSScriptRoot
     } else {
         (Get-Module -ListAvailable TervisShopify).ModuleBase
     }
     . $ModulePath\LocationDefinition.ps1
-    $LocationDefinition
+    $LocationDefinition | Where-Object City -EQ $City
 }
 
 function Get-TervisShopifyOrdersNotTaggedWithEBS {
