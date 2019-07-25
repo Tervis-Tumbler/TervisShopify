@@ -5,11 +5,12 @@
 function Set-TervisShopifyEnvironment {
     param (
         [Parameter(Mandatory)]
-        [ValidateSet("Delta","Production")]$Environment
+        [ValidateSet("Delta","Epsilon","Production")]$Environment
     )
     $GUID = @{
         Delta = "4acc9b2a-080f-4f58-8cbd-843bcbc6d4ab"
-        Production = "a8957c55-9337-4b94-9469-81b06328a9f6"
+        Epsilon = "a8957c55-9337-4b94-9469-81b06328a9f6"
+        Production = "37d9d606-4d1b-49ae-8f89-c0d06c421345"
     }
     $Credential = Get-TervisPasswordstatePassword -Guid $GUID[$Environment] -AsCredential
     Set-ShopifyCredential -Credential $Credential
