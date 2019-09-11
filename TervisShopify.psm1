@@ -479,3 +479,19 @@ function Get-TervisShopifyOrdersWithRefundPending {
 
     Get-ShopifyOrders -ShopName $ShopName -QueryString "tag:RefundPendingUploadToEBS"
 }
+
+function Get-TervisShopifyActiveLocations {
+    param (
+        [Parameter(Mandatory)]$ShopName
+    )
+    
+    $ShopifyLocations = Get-ShopifyLocation -ShopName $ShopName -LocationName * | Where-Object isActive -EQ $true
+    $LocationDefinitions = Import-Csv -Path $PSScriptRoot\LocationDefinition.csv
+    $ShopifyLocations | foreach {
+        $Definition = $LocationDefinitions | Where-Object Description -EQ $_.name
+        $_ | Add-Member -MemberType NoteProperty -Force -Name Subinventory -Value $Definition.Subinventory
+        $_ | Add-Member -MemberType NoteProperty -Force -Name RMSStoreNumber -Value $Definition.RMSStoreNumber
+        $_ | Add-Member -MemberType NoteProperty -Force -Name StoreCustomerNumber -Value $Definition.CustomerNumber
+    }
+    $ShopifyLocations
+}
