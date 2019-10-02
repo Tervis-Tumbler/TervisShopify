@@ -8,7 +8,7 @@ function Set-TervisShopifyEnvironment {
         [ValidateSet("Delta","Epsilon","Production")]$Environment
     )
     $GUID = @{
-        Delta = "4acc9b2a-080f-4f58-8cbd-843bcbc6d4ab"
+        Delta = "a66d6cd9-a055-46be-ae5b-9e29a6832811"
         Epsilon = "a8957c55-9337-4b94-9469-81b06328a9f6"
         Production = "37d9d606-4d1b-49ae-8f89-c0d06c421345"
     }
