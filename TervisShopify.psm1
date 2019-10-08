@@ -469,7 +469,7 @@ function Get-TervisShopifyOrdersNotTaggedWithEBS {
         [Parameter(Mandatory)]$ShopName
     )
 
-    Get-ShopifyOrders -ShopName $ShopName -QueryString "NOT tag:SentToEBS"
+    Get-ShopifyOrders -ShopName $ShopName -QueryString "NOT tag:ImportedToEBS"
 }
 
 function Get-TervisShopifyOrdersWithRefundPending {
