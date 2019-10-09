@@ -452,7 +452,8 @@ function Invoke-TervisShopifyContinuousUpdate {
 
 function Get-TervisShopifyLocationDefinition {
     param (
-        [Parameter(Mandatory)]$City
+        [Parameter(Mandatory,ParameterSetName="City")]$City,
+        [Parameter(Mandatory,ParameterSetName="Name")]$Name
     )
     
     $ModulePath = if ($PSScriptRoot) {
@@ -461,15 +462,27 @@ function Get-TervisShopifyLocationDefinition {
         (Get-Module -ListAvailable TervisShopify).ModuleBase
     }
     . $ModulePath\LocationDefinition.ps1
-    $LocationDefinition | Where-Object City -EQ $City
+    if ($City) {
+        $LocationDefinition | Where-Object City -EQ $City
+    } elseif ($Name) {
+        $LocationDefinition | Where-Object Description -EQ $Name
+    }
 }
 
-function Get-TervisShopifyOrdersNotTaggedWithEBS {
+function Get-TervisShopifyOrdersForImport {
     param (
         [Parameter(Mandatory)]$ShopName
     )
 
-    Get-ShopifyOrders -ShopName $ShopName -QueryString "NOT tag:ImportedToEBS"
+    $Orders = Get-ShopifyOrders -ShopName $ShopName -QueryString "NOT tag:ImportedToEBS"
+    $Orders | ForEach-Object {
+        $SubinventoryCode = Get-TervisShopifyLocationDefinition -Name $_.physicalLocation.name |
+            Select-Object -ExpandProperty Subinventory
+        $OrderId = $_.id | Get-ShopifyIdFromShopifyGid
+        $EBSDocumentReference = "$SubinventoryCode-$OrderId"
+        $_ | Add-Member -MemberType NoteProperty -Name EBSDocumentReference -Value $EBSDocumentReference -Force
+    }
+    return $Orders
 }
 
 function Get-TervisShopifyOrdersWithRefundPending {
