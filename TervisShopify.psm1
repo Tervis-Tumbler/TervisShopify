@@ -9,7 +9,7 @@ function Set-TervisShopifyEnvironment {
     )
     $GUID = @{
         Delta = "a66d6cd9-a055-46be-ae5b-9e29a6832811"
-        Epsilon = "a8957c55-9337-4b94-9469-81b06328a9f6"
+        Epsilon = "a66d6cd9-a055-46be-ae5b-9e29a6832811"
         Production = "37d9d606-4d1b-49ae-8f89-c0d06c421345"
     }
     $Credential = Get-TervisPasswordstatePassword -Guid $GUID[$Environment] -AsCredential
@@ -476,11 +476,11 @@ function Get-TervisShopifyOrdersForImport {
 
     $Orders = Get-ShopifyOrders -ShopName $ShopName -QueryString "NOT tag:ImportedToEBS"
     $Orders | ForEach-Object {
-        $SubinventoryCode = Get-TervisShopifyLocationDefinition -Name $_.physicalLocation.name |
-            Select-Object -ExpandProperty Subinventory
+        $LocationDefinition = Get-TervisShopifyLocationDefinition -Name $_.physicalLocation.name
         $OrderId = $_.id | Get-ShopifyIdFromShopifyGid
-        $EBSDocumentReference = "$SubinventoryCode-$OrderId"
+        $EBSDocumentReference = "$($LocationDefinition.Subinventory)-$OrderId"
         $_ | Add-Member -MemberType NoteProperty -Name EBSDocumentReference -Value $EBSDocumentReference -Force
+        $_ | Add-Member -MemberType NoteProperty -Name StoreCustomerNumber -Value $LocationDefinition.CustomerNumber -Force
     }
     return $Orders
 }
