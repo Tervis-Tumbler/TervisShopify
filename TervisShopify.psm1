@@ -481,6 +481,7 @@ function Get-TervisShopifyOrdersForImport {
         $EBSDocumentReference = "$($LocationDefinition.Subinventory)-$OrderId"
         $_ | Add-Member -MemberType NoteProperty -Name EBSDocumentReference -Value $EBSDocumentReference -Force
         $_ | Add-Member -MemberType NoteProperty -Name StoreCustomerNumber -Value $LocationDefinition.CustomerNumber -Force
+        $_ | Add-Member -MemberType NoteProperty -Name Subinventory -Value $LocationDefinition.Subinventory -Force
     }
     return $Orders
 }
@@ -490,7 +491,16 @@ function Get-TervisShopifyOrdersWithRefundPending {
         [Parameter(Mandatory)]$ShopName
     )
 
-    Get-ShopifyOrders -ShopName $ShopName -QueryString "tag:RefundPendingUploadToEBS"
+    $Orders = Get-ShopifyOrders -ShopName $ShopName -QueryString "tag:RefundPendingImportToEBS"
+    $Orders | ForEach-Object {
+        $LocationDefinition = Get-TervisShopifyLocationDefinition -Name $_.physicalLocation.name
+        $OrderId = $_.id | Get-ShopifyIdFromShopifyGid
+        $EBSDocumentReference = "$($LocationDefinition.Subinventory)-$OrderId"
+        $_ | Add-Member -MemberType NoteProperty -Name EBSDocumentReference -Value $EBSDocumentReference -Force
+        $_ | Add-Member -MemberType NoteProperty -Name StoreCustomerNumber -Value $LocationDefinition.CustomerNumber -Force
+        $_ | Add-Member -MemberType NoteProperty -Name Subinventory -Value $LocationDefinition.Subinventory -Force
+    }
+    return $Orders
 }
 
 function Get-TervisShopifyActiveLocations {
