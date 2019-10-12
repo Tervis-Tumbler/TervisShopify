@@ -496,9 +496,14 @@ function Get-TervisShopifyOrdersWithRefundPending {
         $LocationDefinition = Get-TervisShopifyLocationDefinition -Name $_.physicalLocation.name
         $OrderId = $_.id | Get-ShopifyIdFromShopifyGid
         $EBSDocumentReference = "$($LocationDefinition.Subinventory)-$OrderId"
-        $_ | Add-Member -MemberType NoteProperty -Name EBSDocumentReference -Value $EBSDocumentReference -Force
-        $_ | Add-Member -MemberType NoteProperty -Name StoreCustomerNumber -Value $LocationDefinition.CustomerNumber -Force
-        $_ | Add-Member -MemberType NoteProperty -Name Subinventory -Value $LocationDefinition.Subinventory -Force
+        [array]$RefundIDs = $_.tags |
+            Where-Object {$_ -match "Refund_"} |
+            ForEach-Object {$_.split("_")[1]}
+
+        # $_ | Add-Member -MemberType NoteProperty -Name EBSDocumentReference -Value $EBSDocumentReference -Force
+        # $_ | Add-Member -MemberType NoteProperty -Name StoreCustomerNumber -Value $LocationDefinition.CustomerNumber -Force
+        # $_ | Add-Member -MemberType NoteProperty -Name Subinventory -Value $LocationDefinition.Subinventory -Force
+        # $_ | Add-Member -MemberType NoteProperty -Name RefundIDs -Value $RefundIDs -Force
     }
     return $Orders
 }
