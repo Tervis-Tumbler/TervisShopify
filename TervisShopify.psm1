@@ -505,6 +505,8 @@ function Get-TervisShopifyOrdersWithRefundPending {
             $Refund | Add-Member -MemberType NoteProperty -Name EBSDocumentReference -Value $EBSDocumentReference -Force
             $Refund | Add-Member -MemberType NoteProperty -Name StoreCustomerNumber -Value $LocationDefinition.CustomerNumber -Force
             $Refund | Add-Member -MemberType NoteProperty -Name Subinventory -Value $LocationDefinition.Subinventory -Force
+            $Refund | Add-Member -MemberType NoteProperty -Name RefundID -Value $RefundID
+            $Refund | Add-Member -MemberType NoteProperty -Name RefundTag -Value "Refund_$RefundID"
             $Refund | Add-Member -MemberType NoteProperty -Name Order -Value $Order
             $Refunds += $Refund
         }
@@ -537,4 +539,17 @@ function Get-TervisShopifyActiveLocations {
         $_ | Add-Member -MemberType NoteProperty -Force -Name StoreCustomerNumber -Value $Definition.CustomerNumber
     }
     $ShopifyLocations
+}
+
+function Invoke-TervisShopifyRefundPendingTagCleanup {
+    param (
+        [Parameter(Mandatory)]$ShopName
+    )
+    $Orders = Get-ShopifyOrders -ShopName $ShopName -QueryString "tag:RefundPendingImportToEBS"
+    foreach ($Order in $Orders) {
+        if (-not ($Order.tags -match "Refund_")) {
+            Write-Warning "Removing RefundPending tag from Shopify order #$($Order.legacyResourceId)."
+            $Order | Set-ShopifyOrderTag -ShopName $ShopName -RemoveTag "RefundPendingImportToEBS" | Out-Null
+        }
+    }
 }
