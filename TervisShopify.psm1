@@ -492,20 +492,35 @@ function Get-TervisShopifyOrdersWithRefundPending {
     )
 
     $Orders = Get-ShopifyOrders -ShopName $ShopName -QueryString "tag:RefundPendingImportToEBS"
-    $Orders | ForEach-Object {
-        $LocationDefinition = Get-TervisShopifyLocationDefinition -Name $_.physicalLocation.name
-        $OrderId = $_.id | Get-ShopifyIdFromShopifyGid
-        $EBSDocumentReference = "$($LocationDefinition.Subinventory)-$OrderId"
-        [array]$RefundIDs = $_.tags |
+    $Refunds = @()
+    foreach ($Order in $Orders) {
+        $LocationDefinition = Get-TervisShopifyLocationDefinition -Name $Order.physicalLocation.name
+        $AllRefundsForOrder = Get-ShopifyRefunds -ShopName $ShopName -OrderGID $Order.id
+        $OrderId = $Order.id | Get-ShopifyIdFromShopifyGid
+        [array]$RefundIDs = $Order | Get-TervisShopifyRefundIdsFromOrderTags
+        
+        foreach ($RefundID in $RefundIDs) {
+            $Refund = $AllRefundsForOrder | Where-Object id -Match $RefundID
+            $EBSDocumentReference = "$($LocationDefinition.Subinventory)-$OrderId-$RefundID"
+            $Refund | Add-Member -MemberType NoteProperty -Name EBSDocumentReference -Value $EBSDocumentReference -Force
+            $Refund | Add-Member -MemberType NoteProperty -Name StoreCustomerNumber -Value $LocationDefinition.CustomerNumber -Force
+            $Refund | Add-Member -MemberType NoteProperty -Name Subinventory -Value $LocationDefinition.Subinventory -Force
+            $Refund | Add-Member -MemberType NoteProperty -Name Order -Value $Order
+            $Refunds += $Refund
+        }
+    }
+    return $Refunds
+}
+
+function Get-TervisShopifyRefundIdsFromOrderTags {
+    param (
+        [Parameter(Mandatory,ValueFromPipelineByPropertyName)]$Tags
+    )
+    process {
+        $Tags | 
             Where-Object {$_ -match "Refund_"} |
             ForEach-Object {$_.split("_")[1]}
-
-        # $_ | Add-Member -MemberType NoteProperty -Name EBSDocumentReference -Value $EBSDocumentReference -Force
-        # $_ | Add-Member -MemberType NoteProperty -Name StoreCustomerNumber -Value $LocationDefinition.CustomerNumber -Force
-        # $_ | Add-Member -MemberType NoteProperty -Name Subinventory -Value $LocationDefinition.Subinventory -Force
-        # $_ | Add-Member -MemberType NoteProperty -Name RefundIDs -Value $RefundIDs -Force
     }
-    return $Orders
 }
 
 function Get-TervisShopifyActiveLocations {
