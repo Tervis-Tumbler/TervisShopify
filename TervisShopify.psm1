@@ -461,7 +461,7 @@ function Get-TervisShopifyLocationDefinition {
     } else {
         (Get-Module -ListAvailable TervisShopify).ModuleBase
     }
-    . $ModulePath\LocationDefinition.ps1
+    $LocationDefinition = Import-Csv -Path $ModulePath\LocationDefinition.csv
     if ($City) {
         $LocationDefinition | Where-Object City -EQ $City
     } elseif ($Name) {
@@ -529,9 +529,13 @@ function Get-TervisShopifyActiveLocations {
     param (
         [Parameter(Mandatory)]$ShopName
     )
-    
+    $ModulePath = if ($PSScriptRoot) {
+        $PSScriptRoot
+    } else {
+        (Get-Module -ListAvailable TervisShopify).ModuleBase
+    }
     $ShopifyLocations = Get-ShopifyLocation -ShopName $ShopName -LocationName * | Where-Object isActive -EQ $true
-    $LocationDefinitions = Import-Csv -Path $PSScriptRoot\LocationDefinition.csv
+    $LocationDefinitions = Import-Csv -Path $ModulePath\LocationDefinition.csv
     $ShopifyLocations | foreach {
         $Definition = $LocationDefinitions | Where-Object Description -EQ $_.name
         $_ | Add-Member -MemberType NoteProperty -Force -Name Subinventory -Value $Definition.Subinventory
