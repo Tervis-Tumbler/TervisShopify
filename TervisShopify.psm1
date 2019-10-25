@@ -474,7 +474,7 @@ function Get-TervisShopifyOrdersForImport {
         [Parameter(Mandatory)]$ShopName
     )
 
-    $Orders = Get-ShopifyOrders -ShopName $ShopName -QueryString "NOT tag:ImportedToEBS"
+    $Orders = Get-ShopifyOrders -ShopName $ShopName -QueryString "NOT tag:ImportedToEBS" #Omit exchanges
     $Orders | ForEach-Object {
         $LocationDefinition = Get-TervisShopifyLocationDefinition -Name $_.physicalLocation.name
         $OrderId = $_.id | Get-ShopifyIdFromShopifyGid
@@ -488,10 +488,13 @@ function Get-TervisShopifyOrdersForImport {
 
 function Get-TervisShopifyOrdersWithRefundPending {
     param (
-        [Parameter(Mandatory)]$ShopName
+        [Parameter(Mandatory)]$ShopName,
+        $Orders
     )
-
-    $Orders = Get-ShopifyOrders -ShopName $ShopName -QueryString "tag:RefundPendingImportToEBS"
+    
+    if (-not $Orders) {
+        $Orders = Get-ShopifyOrders -ShopName $ShopName -QueryString "tag:RefundPendingImportToEBS" #Omit exhanges
+    }
     $Refunds = @()
     foreach ($Order in $Orders) {
         $LocationDefinition = Get-TervisShopifyLocationDefinition -Name $Order.physicalLocation.name
@@ -555,5 +558,36 @@ function Invoke-TervisShopifyRefundPendingTagCleanup {
             Write-Warning "Removing RefundPending tag from Shopify order #$($Order.legacyResourceId)."
             $Order | Set-ShopifyOrderTag -ShopName $ShopName -RemoveTag "RefundPendingImportToEBS" | Out-Null
         }
+    }
+}
+
+function Get-TervisShopifyExchangesForImport {
+    param (
+        [Parameter(Mandatory)]$ShopName
+    )
+    # $Orders = Get-ShopifyOrders -ShopName $ShopName -QueryString "NOT tag:ImportedToEBS" | 
+    $Orders = Get-ShopifyOrders -ShopName $ShopName -QueryString "XTest" | 
+        Where-Object {$_.events.edges.node.message -match "completed an exchange"}
+
+    foreach ($Order in $Orders) {
+        $ExchangeCompletedOrderIDs = $Order | Get-TervisShopifyCompletedExchangeOrderID
+        $ExchangeCompletedOrders = foreach ($ID in $ExchangeCompletedOrderIDs) {
+        
+        }
+        $Refunds = Get-TervisShopifyOrdersWithRefundPending -ShopName $ShopName -Orders $Order
+        
+    }
+}
+
+function Get-TervisShopifyCompletedExchangeOrderID {
+    param (
+        [Parameter(Mandatory,ValueFromPipeline)]$Order
+    )
+    process {
+        $CompletedOrderEventMessages = $Order.events.edges.node.message -match "completed an exchange"
+        $IDs = foreach ($Message in $CompletedOrderEventMessages) {
+            ($Message -split 'orders/' | Select-Object -First 1 -Skip 1) -split '">' | Select-Object -First 1
+        }
+        return $IDs
     }
 }
