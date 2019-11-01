@@ -471,10 +471,12 @@ function Get-TervisShopifyLocationDefinition {
 
 function Get-TervisShopifyOrdersForImport {
     param (
-        [Parameter(Mandatory)]$ShopName
+        [Parameter(Mandatory)]$ShopName,
+        $Orders
     )
-
-    $Orders = Get-ShopifyOrders -ShopName $ShopName -QueryString "NOT tag:ImportedToEBS" #Omit exchanges
+    if (-not $Orders) {
+        $Orders = Get-ShopifyOrders -ShopName $ShopName -QueryString "NOT tag:ImportedToEBS" #Omit exchanges
+    }
     $Orders | ForEach-Object {
         $LocationDefinition = Get-TervisShopifyLocationDefinition -Name $_.physicalLocation.name
         $OrderId = $_.id | Get-ShopifyIdFromShopifyGid
@@ -482,6 +484,7 @@ function Get-TervisShopifyOrdersForImport {
         $_ | Add-Member -MemberType NoteProperty -Name EBSDocumentReference -Value $EBSDocumentReference -Force
         $_ | Add-Member -MemberType NoteProperty -Name StoreCustomerNumber -Value $LocationDefinition.CustomerNumber -Force
         $_ | Add-Member -MemberType NoteProperty -Name Subinventory -Value $LocationDefinition.Subinventory -Force
+        $_ | Add-Member -MemberType NoteProperty -Name ReceiptMethodId -Value $LocationDefinition.ReceiptMethodId -Force
     }
     return $Orders
 }
@@ -572,7 +575,7 @@ function Get-TervisShopifyExchangesForImport {
     foreach ($Order in $Orders) {
         $ExchangeCompletedOrderIDs = $Order | Get-TervisShopifyCompletedExchangeOrderID
         $ExchangeCompletedOrders = foreach ($ID in $ExchangeCompletedOrderIDs) {
-        
+            Get-ShopifyOrder -ShopName $ShopName -OrderId $ID
         }
         $Refunds = Get-TervisShopifyOrdersWithRefundPending -ShopName $ShopName -Orders $Order
         
