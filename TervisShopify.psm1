@@ -1,6 +1,13 @@
 #Requires -Modules ShopifyPowerShell,TervisPowershellJobs,TervisPasswordstatePowerShell
 
-# Set-TervisShopifyEnvironment
+function Invoke-TervisShopifyModuleImport {
+    param (
+        [ValidateSet("Delta","Epsilon","Production")]$Environment = "Delta"
+    )
+    Import-Module -Global -Force -Name ShopifyPowerShell,TervisShopify,TervisShopifyPowerShellApplication
+    Set-TervisShopifyEnvironment -Environment $Environment
+    Set-TervisEBSEnvironment -Name $Environment
+}
 
 function Set-TervisShopifyEnvironment {
     param (
@@ -472,7 +479,7 @@ function Get-TervisShopifyLocationDefinition {
 function Get-TervisShopifyOrdersForImport {
     param (
         [Parameter(Mandatory)]$ShopName,
-        $Orders
+        [Parameter(ValueFromPipeline)]$Orders
     )
     if (-not $Orders) {
         $Orders = Get-ShopifyOrders -ShopName $ShopName -QueryString "NOT tag:ImportedToEBS" #Omit exchanges
@@ -569,16 +576,37 @@ function Get-TervisShopifyExchangesForImport {
         [Parameter(Mandatory)]$ShopName
     )
     # $Orders = Get-ShopifyOrders -ShopName $ShopName -QueryString "NOT tag:ImportedToEBS" | 
-    $Orders = Get-ShopifyOrders -ShopName $ShopName -QueryString "XTest" | 
+    $Orders = Get-ShopifyOrders -ShopName $ShopName -QueryString "tag:XTest" | 
         Where-Object {$_.events.edges.node.message -match "completed an exchange"}
 
     foreach ($Order in $Orders) {
         $ExchangeCompletedOrderIDs = $Order | Get-TervisShopifyCompletedExchangeOrderID
+        
+        # Assuming one refund on exchange for now
         $ExchangeCompletedOrders = foreach ($ID in $ExchangeCompletedOrderIDs) {
-            Get-ShopifyOrder -ShopName $ShopName -OrderId $ID
+            Get-ShopifyOrder -ShopName $ShopName -OrderId $ID | Get-TervisShopifyOrdersForImport -ShopName $ShopName
         }
         $Refunds = Get-TervisShopifyOrdersWithRefundPending -ShopName $ShopName -Orders $Order
         
+        $ConvertedOrderHeader = $ExchangeCompletedOrders | Convert-TervisShopifyOrderToEBSOrderLineHeader
+        [array]$ConvertedOrderLines = $ExchangeCompletedOrders | Convert-TervisShopifyOrderToEBSOrderLines
+        $ConvertedOrderLines += $Refunds | Convert-TervisShopifyRefundToEBSOrderLines
+        # if total payment is positive, create payment
+        # Need to correctly calculate the total payment (New items minus credit from sale)
+        $ConvertedOrderPayment = $ExchangeCompletedOrders | Convert-TervisShopifyPaymentsToEBSPayment -ShopName $ShopName
+        [array]$Subqueries = $ConvertedOrderHeader | New-EBSOrderLineHeaderSubquery
+        $Subqueries += $ConvertedOrderLines | New-EBSOrderLineSubquery
+        $Subqueries += $ConvertedOrderPayment | New-EBSOrderLinePaymentSubquery
+
+        Invoke-EBSSubqueryInsert -ShowQuery -Subquery $Subqueries
+
+        <#
+        Next things to work on:
+        - Correct line item number (count starts over on refunds)
+        - Refunds need to have correct orig sys doc ref (match exchange order, not original order+refund id)
+        - Correctly handle refund ID tags on original order
+        - Do not attempt to overwrite existing exchange order in EBS
+        #>
     }
 }
 
@@ -593,4 +621,11 @@ function Get-TervisShopifyCompletedExchangeOrderID {
         }
         return $IDs
     }
+}
+
+function Get-TervisShopifyPersonalizedTestOrder {
+    param (
+        [Parameter(Mandatory)]$ShopName
+    )
+    Get-ShopifyOrders -ShopName $ShopName -QueryString "tag:PTest" | Get-TervisShopifyOrdersForImport -ShopName $ShopName
 }
