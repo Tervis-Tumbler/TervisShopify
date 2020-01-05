@@ -627,5 +627,5 @@ function Get-TervisShopifyPersonalizedTestOrder {
     param (
         [Parameter(Mandatory)]$ShopName
     )
-    Get-ShopifyOrders -ShopName $ShopName -QueryString "tag:PTest" | Get-TervisShopifyOrdersForImport -ShopName $ShopName
+    Get-ShopifyOrders -ShopName $ShopName -QueryString "tag:PTest3" | Get-TervisShopifyOrdersForImport -ShopName $ShopName
 }
