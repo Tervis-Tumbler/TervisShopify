@@ -488,10 +488,12 @@ function Get-TervisShopifyOrdersForImport {
         $LocationDefinition = Get-TervisShopifyLocationDefinition -Name $_.physicalLocation.name
         $OrderId = $_.id | Get-ShopifyIdFromShopifyGid
         $EBSDocumentReference = "$($LocationDefinition.Subinventory)-$OrderId"
+        $CustomAttributes = $_ | Convert-TervisShopifyCustomAttributesToObject
         $_ | Add-Member -MemberType NoteProperty -Name EBSDocumentReference -Value $EBSDocumentReference -Force
         $_ | Add-Member -MemberType NoteProperty -Name StoreCustomerNumber -Value $LocationDefinition.CustomerNumber -Force
         $_ | Add-Member -MemberType NoteProperty -Name Subinventory -Value $LocationDefinition.Subinventory -Force
         $_ | Add-Member -MemberType NoteProperty -Name ReceiptMethodId -Value $LocationDefinition.ReceiptMethodId -Force
+        $_ | Add-Member -MemberType NoteProperty -Name CustomAttributes -Value $CustomAttributes -Force
     }
     return $Orders
 }
