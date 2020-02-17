@@ -624,10 +624,3 @@ function Get-TervisShopifyCompletedExchangeOrderID {
         return $IDs
     }
 }
-
-function Get-TervisShopifyPersonalizedTestOrder {
-    param (
-        [Parameter(Mandatory)]$ShopName
-    )
-    Get-ShopifyOrders -ShopName $ShopName -QueryString "tag:PTest3" | Get-TervisShopifyOrdersForImport -ShopName $ShopName
-}
