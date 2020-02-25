@@ -495,6 +495,7 @@ function Get-TervisShopifyOrdersForImport {
         $_ | Add-Member -MemberType NoteProperty -Name ReceiptMethodId -Value $LocationDefinition.ReceiptMethodId -Force
         $_ | Add-Member -MemberType NoteProperty -Name CustomAttributes -Value $CustomAttributes -Force
         $_ | Select-TervisShopifyOrderPersonalizationLines | Add-TervisShopifyOrderPersonalizationSKU
+        $_ | Set-TervisShopifyOrderPersonalizedItemNumber 
     }
     return $Orders
 }
