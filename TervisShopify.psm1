@@ -628,3 +628,21 @@ function Get-TervisShopifyCompletedExchangeOrderID {
         return $IDs
     }
 }
+
+function Get-TervisShopifySuperCollectionName {
+    param (
+        [Parameter(Mandatory)]$Collection
+    )
+
+    $ModulePath = if ($PSScriptRoot) {
+        $PSScriptRoot
+    } else {
+        (Get-Module -ListAvailable TervisShopify).ModuleBase
+    }
+    if (-not $Script:CollectionDefinition) {
+        $Script:CollectionDefinition = Import-Csv -Path $ModulePath\OnlineCollections.csv
+    }
+    return $Script:CollectionDefinition | 
+        Where-Object ChildCollection -Like $Collection | 
+        Select-Object -ExpandProperty ParentCollection -Unique
+}
