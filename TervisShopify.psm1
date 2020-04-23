@@ -513,7 +513,7 @@ function Get-TervisShopifyOrdersWithRefundPending {
     )
     
     if (-not $Orders) {
-        $Orders = Get-ShopifyOrders -ShopName $ShopName -QueryString "tag:RefundPendingImportToEBS" #Omit exhanges
+        $Orders = Get-ShopifyOrders -ShopName $ShopName -QueryString "tag:RefundPendingImportToEBS NOT tag:IgnoreImport" #Omit exhanges
     }
     $Refunds = @()
     foreach ($Order in $Orders) {
