@@ -459,8 +459,8 @@ function Invoke-TervisShopifyContinuousUpdate {
 
 function Get-TervisShopifyLocationDefinition {
     param (
-        [Parameter(Mandatory,ParameterSetName="City")]$City,
-        [Parameter(Mandatory,ParameterSetName="Name")]$Name
+        [Parameter(ParameterSetName="City")]$City,
+        [Parameter(ParameterSetName="Name")]$Name
     )
     
     $ModulePath = if ($PSScriptRoot) {
@@ -473,6 +473,10 @@ function Get-TervisShopifyLocationDefinition {
         $LocationDefinition | Where-Object City -EQ $City
     } elseif ($Name) {
         $LocationDefinition | Where-Object Description -EQ $Name
+    } else {
+        $Online = $LocationDefinition | Where-Object Subinventory -EQ "FL1"
+        $Online.Description = "Online"
+        $Online
     }
 }
 
@@ -482,10 +486,11 @@ function Get-TervisShopifyOrdersForImport {
         [Parameter(ValueFromPipeline)]$Orders
     )
     if (-not $Orders) {
-        $Orders = Get-ShopifyOrders -ShopName $ShopName -QueryString "NOT tag:ImportedToEBS" #Omit exchanges
+        $Orders = Get-ShopifyOrders -ShopName $ShopName -QueryString "NOT tag:ImportedToEBS NOT tag:IgnoreImport" #Omit exchanges
     }
     $Orders | ForEach-Object {
         $LocationDefinition = Get-TervisShopifyLocationDefinition -Name $_.physicalLocation.name
+        $IsOnlineOrder = if (-not $_.physicalLocation) { $true } else { $false }
         $OrderId = $_.id | Get-ShopifyIdFromShopifyGid
         $EBSDocumentReference = "$($LocationDefinition.Subinventory)-$OrderId"
         $CustomAttributes = $_ | Convert-TervisShopifyCustomAttributesToObject
@@ -494,6 +499,7 @@ function Get-TervisShopifyOrdersForImport {
         $_ | Add-Member -MemberType NoteProperty -Name Subinventory -Value $LocationDefinition.Subinventory -Force
         $_ | Add-Member -MemberType NoteProperty -Name ReceiptMethodId -Value $LocationDefinition.ReceiptMethodId -Force
         $_ | Add-Member -MemberType NoteProperty -Name CustomAttributes -Value $CustomAttributes -Force
+        $_ | Add-Member -MemberType NoteProperty -Name IsOnlineOrder -Value $IsOnlineOrder -Force
         $_ | Select-TervisShopifyOrderPersonalizationLines | Add-TervisShopifyOrderPersonalizationSKU
         $_ | Set-TervisShopifyOrderPersonalizedItemNumber 
     }
