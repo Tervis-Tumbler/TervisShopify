@@ -574,7 +574,7 @@ function Invoke-TervisShopifyRefundPendingTagCleanup {
     param (
         [Parameter(Mandatory)]$ShopName
     )
-    $Orders = Get-ShopifyOrders -ShopName $ShopName -QueryString "tag:RefundPendingImportToEBS"
+    $Orders = Get-ShopifyOrders -ShopName $ShopName -QueryString "tag:RefundPendingImportToEBS NOT tag:IgnoreImport"
     foreach ($Order in $Orders) {
         if (-not ($Order.tags -match "Refund_")) {
             Write-Warning "Removing RefundPending tag from Shopify order #$($Order.legacyResourceId)."
