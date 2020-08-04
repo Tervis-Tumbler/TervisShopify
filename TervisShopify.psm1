@@ -502,8 +502,44 @@ function Get-TervisShopifyOrdersForImport {
         $_ | Add-Member -MemberType NoteProperty -Name IsOnlineOrder -Value $IsOnlineOrder -Force
         $_ | Select-TervisShopifyOrderPersonalizationLines | Add-TervisShopifyOrderPersonalizationSKU
         $_ | Set-TervisShopifyOrderPersonalizedItemNumber 
+        $_ | Add-TervisShopifyCartDiscountAsLineItem
     }
     return $Orders
+}
+
+function Add-TervisShopifyCartDiscountAsLineItem {
+    param (
+        [Parameter(Mandatory,ValueFromPipeline)]$Order
+    )
+    process {
+        if (-not $Order.cartDiscountAmountSet) { return }
+        $Order.lineItems.edges += [PSCustomObject]@{
+            node = [PSCustomObject]@{
+                name = $Order.discountCode
+                sku = "1020604"
+                quantity = 1
+                originalUnitPriceSet = [PSCustomObject]@{
+                    shopMoney = [PSCustomObject]@{
+                        amount = $Order.cartDiscountAmountSet.shopMoney.amount * -1
+                    }
+                }
+                discountedUnitPriceSet = [PSCustomObject]@{
+                    shopMoney = [PSCustomObject]@{
+                        amount = $Order.cartDiscountAmountSet.shopMoney.amount * -1
+                    }
+                }
+                taxLines = @(
+                    [PSCustomObject]@{
+                        priceSet = [PSCustomObject]@{
+                            shopMoney = [PSCustomObject]@{
+                                amount = 0
+                            }
+                        }
+                    }
+                )
+            }
+        }
+    }
 }
 
 function Get-TervisShopifyOrdersWithRefundPending {
