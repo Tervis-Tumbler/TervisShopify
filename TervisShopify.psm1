@@ -513,19 +513,23 @@ function Add-TervisShopifyCartDiscountAsLineItem {
     )
     process {
         if (-not $Order.cartDiscountAmountSet) { return }
+        $DiscountSku = "1373422"
+        # $DiscountSku = "1371644" # Uncomment for SIT until next refresh after 07-2020
+        $DiscountName = $Order.discountCode
+        $DiscountAmount = [decimal]$Order.cartDiscountAmountSet.shopMoney.amount * -1
         $Order.lineItems.edges += [PSCustomObject]@{
             node = [PSCustomObject]@{
-                name = $Order.discountCode
-                sku = "1020604"
+                name = $DiscountName
+                sku = $DiscountSku
                 quantity = 1
                 originalUnitPriceSet = [PSCustomObject]@{
                     shopMoney = [PSCustomObject]@{
-                        amount = $Order.cartDiscountAmountSet.shopMoney.amount * -1
+                        amount = $DiscountAmount
                     }
                 }
                 discountedUnitPriceSet = [PSCustomObject]@{
                     shopMoney = [PSCustomObject]@{
-                        amount = $Order.cartDiscountAmountSet.shopMoney.amount * -1
+                        amount = $DiscountAmount
                     }
                 }
                 taxLines = @(
