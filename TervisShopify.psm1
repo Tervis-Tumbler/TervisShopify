@@ -692,3 +692,23 @@ function Get-TervisShopifySuperCollectionName {
         Where-Object ChildCollection -Like $Collection | 
         Select-Object -ExpandProperty ParentCollection -Unique
 }
+
+function Find-TervisShopifyEBSOrderNumberAndOrigSysDocumentRef {
+    param (
+        [Parameter(Mandatory,ValueFromPipeline)]$SearchTerm,
+        [Parameter(Mandatory)][ValidateSet("order_number","orig_sys_document_ref")]$Column
+    )
+    begin {
+        $BaseQuery = "select order_number, orig_sys_document_ref from apps.oe_order_headers_all "
+    }
+    process {
+        if ($SearchTerm -match "%") {
+             $Operator = "LIKE"
+        } else {
+            $Operator = "="
+        }
+
+        $Query = $BaseQuery + "where $Column $Operator '$SearchTerm'"
+        Invoke-EBSSQL -SQLCommand $Query
+    }
+}
