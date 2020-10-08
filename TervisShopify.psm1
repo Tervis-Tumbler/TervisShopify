@@ -743,3 +743,29 @@ function Invoke-TervisShopifyReprocessBTO {
     }
 
 }
+
+function Invoke-TervisShopifyReprocessOrder {
+    param (
+        $OrderID,
+        $ShopName = "tervisstore"
+    )
+    $ShopifyOrder = Get-ShopifyOrder -ShopName $ShopName -OrderId $OrderID
+    $Order = Get-TervisShopifyOrdersForImport -ShopName $ShopName -Orders $ShopifyOrder
+    try {
+        if (
+            -not $Order.StoreCustomerNumber -or
+            -not $Order.Subinventory -or
+            -not $Order.ReceiptMethodId
+        ) {throw "Location information incomplete. Please update LocationDefinition.csv."}
+        if (-not (Test-TervisShopifyEBSOrderExists -Order $Order)) {
+            $OrderObject = $Order | New-TervisShopifyOrderObject -ShopName $ShopName
+            $EBSQuery = $OrderObject | Convert-TervisShopifyOrderObjectToEBSQuery
+            $text = $OrderObject | ConvertTo-JsonEx
+            Read-Host "$text`n`nContinue?"
+            Invoke-EBSSQL -SQLCommand $EBSQuery
+        }
+        $Order | Set-ShopifyOrderTag -ShopName $ShopName -AddTag "ImportedToEBS" | Out-Null
+    } catch {
+        throw "Something went wrong importing Shopify order #$($Order.legacyResourceId). Reason:`n$_`n$($_.InvocationInfo.PositionMessage)" 
+    }
+}
