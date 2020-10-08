@@ -712,3 +712,34 @@ function Find-TervisShopifyEBSOrderNumberAndOrigSysDocumentRef {
         Invoke-EBSSQL -SQLCommand $Query
     }
 }
+
+function Get-TervisShopifyEBSOrderNumberFromShopifyOrderID {
+    param (
+        $OrderID
+    )
+    Find-TervisShopifyEBSOrderNumberAndOrigSysDocumentRef -Column orig_sys_document_ref -SearchTerm "%$OrderID%"
+}
+
+function Invoke-TervisShopifyReprocessBTO {
+    param (
+        $OrderID
+    )
+    $ShopifyOrder = Get-ShopifyOrder -ShopName tervisstore -OrderId $OrderID
+    $Order = Get-TervisShopifyOrdersForImport -ShopName tervisstore -Orders $ShopifyOrder
+    $IsBTO = $Order | Test-TervisShopifyBuildToOrder
+    if ($IsBTO) {
+        $OrderBTO = $Order | ConvertTo-TervisShopifyOrderBTO
+        if (-not (Test-TervisShopifyEBSOrderExists -Order $OrderBTO)) {
+            $OrderObject = $OrderBTO | New-TervisShopifyBuildToOrderObject
+            $EBSQueryBTO = $OrderObject | Convert-TervisShopifyOrderObjectToEBSQuery
+            $text = $OrderObject | ConvertTo-JsonEx
+            Read-Host "$text`n`nContinue?"
+            Invoke-EBSSQL -SQLCommand $EBSQueryBTO
+        } else {
+            Write-Warning "BTO already in EBS"
+        }
+    } else {
+        Write-Warning "No BTO detected"
+    }
+
+}
