@@ -1,30 +1,30 @@
-Subinventory,RMSStoreNumber,Description,AddressLine1,AddressLine2,City,State,PostalCode,PhoneNumber,CustomerNumber,ReceiptMethodId
-FL1,1010,"Tervis Factory Store - Osprey, FL",928 S Tamiami Trail,,Osprey,FL,34229-9218,941-966-8614,376088,1003
-FL11,3035,"Tervis Factory Store - St Armands, FL",319 John Ringling Blvd,,Sarasota,FL,34236,941-388-2040,1348488,4004
-FL12,3040,"Tervis Factory Store - St Augustine, FL","162 Saint George St, Suite 1",,St Augustine,FL,32084,904-829-0100,3523488,1003
-FL13,3041,"Tervis Factory Store - Orlando, FL","8371 International Drive, Space #90",,Orlando,FL,32819,407-930-7400,3570341,1003
-FL14,3047,"Tervis Factory Store - Tampa, FL",2223 N. West Shore Blvd,Space No. 105,Tampa,FL,33607,813-371-1420,4622829,1003
-FL2,1020,"Tervis Factory Store - Palm Beach, FL",Crystal Tree Center,1201 US Highway 1 Ste 5,North Palm Beach,FL,33408-3546,561-626-8324,376089,1003
-FL3,1030,"Tervis Factory Store - The Villages, FL",1109 Main Street,,The Villages,FL,32159-7720,352-750-0035,524741,1003
-FL5,1050,"Tervis Factory Store - Panama City Beach, FL",Pier Park Mall,700 Pier Park Drive - Suite 120,Panama City Beach,FL,32413,850-235-0707,802082,4003
-FL6,1060,"Tervis Factory Store - Key West, FL",431 Front Street - Unit 3,,Key West,FL,33040,305-296-8252,802080,1003
-FL9,3034,"Tervis Factory Store - Destin, FL",4277 Legendary Drive - Suite J-122,,Destin,FL,32541,850-269-7620,1342521,4004
-IN1,3048,"Tervis Factory Store - Indianapolis, IN",49 West Maryland St,Space E18 - #128,Indianapolis,IN,46204,317-423-3967,4679594,4002
-MI1,3007,"Tervis Factory Store - Frankenmuth, MI",925 South Main Street,Suite B-4,Frankenmuth,MI,48734,989-652-8900,952142,4002
-MN1,3015,"Tervis Factory Store - Bloomington, MN",Tervis - Mall of America,370 West Market,Bloomington,MN,55425,952-854-4054,1028967,4004
-MO1,3003,"Tervis Factory Store - Branson, MO",503 Branson Landing,,Branson,MO,65616,417-332-0200,857467,4003
-MO2,3050,"Tervis Factory Store - Kansas City, MO",606 West 48th Street,Space #A606,Kansas City,MO,64112,816-491-8052,5927470,1003
-NV2,3019,"Tervis Factory Store - Las Vegas, NV",3663 Las Vegas Blvd South,Suite 444,Las Vegas,NV,89109,702-477-6725,1203121,4004
-OH2,3046,"Tervis Factory Store - Cincinnati, OH",151 E. Freedom Way,Space 185,Cincinnati,OH,45202,513-381-0931,4496561,4002
-SC1,2010,"Tervis Factory Store - Myrtle Beach, SC",1315 Celebrity Cir. Unit 111,,Myrtle Beach,SC,29577-7456,843-213-1637,691362,1003
-SC2,3002,"Tervis Factory Store - Charleston, SC",179 Church Street,,Charleston,SC,29401,843-724-6707,826679,1003
-TN1,3001,"Tervis Factory Store - Gatlinburg, TN",The Village,"634 Parkway, Suite 7",Gatlinburg,TN,37738,865-430-1991,802084,4001
-TN2,3029,"Tervis Factory Store - Pigeon Forge, TN",131 The Island Drive - Suite 9102,,Pigeon Forge,TN,37863,865-774-7292,1323524,4001
-TX3,3044,"Tervis Factory Store - Ft Worth, TX",112 East 4th St,,Ft Worth,TX,76102,817-820-0682,4251246,1003
-VA1,3036,"Tervis Factory Store - Virginia Beach, VA",312 Laskin Road,The Shops at 31 Ocean,Virginia Beach,VA,23451,757-422-0219,1370071,1003
-VA2,3038,"Tervis Factory Store - Williamsburg, VA",4470 Prince George St,Shop D,Williamsburg,VA,23185,757-229-0907,1405591,4004
-FL0,1000,"Tervis Headquarters - Nokomis, FL",201 Triple Diamond Blvd,,Nokomis,FL,34275,941-966-2114,,
-K02,3009,"Tervis Kiosk - Brandon, FL",932 Brandon Town Center Drive,Space R046Z,Brandon,FL,33511,,27773921,1003
-FL17,,Tervis Pop Up Store - Ellenton Outlet Mall,5422 Factory Shops Blvd,Unit 130,Ellenton,FL,34222,,27780521,1003
-K08,,"Tervis Kiosk - Palm Beach, FL",1751 Palm Beach Lakes Blvd,Space PC02,West Palm Beach,FL,33401,,27774428,1003
-FL16,,"Tervis Factory Store - Coconut Point, FL",23151 Fashion Drive,Suite 109,Estero,FL,33928,239-221-5290,27732679,1003
+Subinventory,RMSStoreNumber,Description,AddressLine1,AddressLine2,City,State,PostalCode,PhoneNumber,CustomerNumber,ReceiptMethodId,FreshDeskLocation
+FL1,1010,"Tervis Factory Store - Osprey, FL",928 S Tamiami Trail,,Osprey,FL,34229-9218,941-966-8614,376088,1003,Osprey
+FL11,3035,"Tervis Factory Store - St Armands, FL",319 John Ringling Blvd,,Sarasota,FL,34236,941-388-2040,1348488,4004,St Armands Circle
+FL12,3040,"Tervis Factory Store - St Augustine, FL","162 Saint George St, Suite 1",,St Augustine,FL,32084,904-829-0100,3523488,1003,St Augustine
+FL13,3041,"Tervis Factory Store - Orlando, FL","8371 International Drive, Space #90",,Orlando,FL,32819,407-930-7400,3570341,1003,Orlando
+FL14,3047,"Tervis Factory Store - Tampa, FL",2223 N. West Shore Blvd,Space No. 105,Tampa,FL,33607,813-371-1420,4622829,1003,Tampa
+FL2,1020,"Tervis Factory Store - Palm Beach, FL",Crystal Tree Center,1201 US Highway 1 Ste 5,North Palm Beach,FL,33408-3546,561-626-8324,376089,1003,Palm Beach
+FL3,1030,"Tervis Factory Store - The Villages, FL",1109 Main Street,,The Villages,FL,32159-7720,352-750-0035,524741,1003,The Villages
+FL5,1050,"Tervis Factory Store - Panama City Beach, FL",Pier Park Mall,700 Pier Park Drive - Suite 120,Panama City Beach,FL,32413,850-235-0707,802082,4003,Panama City Beach
+FL6,1060,"Tervis Factory Store - Key West, FL",431 Front Street - Unit 3,,Key West,FL,33040,305-296-8252,802080,1003,Key West
+FL9,3034,"Tervis Factory Store - Destin, FL",4277 Legendary Drive - Suite J-122,,Destin,FL,32541,850-269-7620,1342521,4004,Destin
+IN1,3048,"Tervis Factory Store - Indianapolis, IN",49 West Maryland St,Space E18 - #128,Indianapolis,IN,46204,317-423-3967,4679594,4002,Indianapolis
+MI1,3007,"Tervis Factory Store - Frankenmuth, MI",925 South Main Street,Suite B-4,Frankenmuth,MI,48734,989-652-8900,952142,4002,Frankenmuth
+MN1,3015,"Tervis Factory Store - Bloomington, MN",Tervis - Mall of America,370 West Market,Bloomington,MN,55425,952-854-4054,1028967,4004,Mall of America
+MO1,3003,"Tervis Factory Store - Branson, MO",503 Branson Landing,,Branson,MO,65616,417-332-0200,857467,4003,Branson
+MO2,3050,"Tervis Factory Store - Kansas City, MO",606 West 48th Street,Space #A606,Kansas City,MO,64112,816-491-8052,5927470,1003,Kansas City
+NV2,3019,"Tervis Factory Store - Las Vegas, NV",3663 Las Vegas Blvd South,Suite 444,Las Vegas,NV,89109,702-477-6725,1203121,4004,Miracle Mile
+OH2,3046,"Tervis Factory Store - Cincinnati, OH",151 E. Freedom Way,Space 185,Cincinnati,OH,45202,513-381-0931,4496561,4002,Cincinnati
+SC1,2010,"Tervis Factory Store - Myrtle Beach, SC",1315 Celebrity Cir. Unit 111,,Myrtle Beach,SC,29577-7456,843-213-1637,691362,1003,Myrtle Beach
+SC2,3002,"Tervis Factory Store - Charleston, SC",179 Church Street,,Charleston,SC,29401,843-724-6707,826679,1003,Charleston
+TN1,3001,"Tervis Factory Store - Gatlinburg, TN",The Village,"634 Parkway, Suite 7",Gatlinburg,TN,37738,865-430-1991,802084,4001,Gatlinburg
+TN2,3029,"Tervis Factory Store - Pigeon Forge, TN",131 The Island Drive - Suite 9102,,Pigeon Forge,TN,37863,865-774-7292,1323524,4001,Pigeon Forge
+TX3,3044,"Tervis Factory Store - Ft Worth, TX",112 East 4th St,,Ft Worth,TX,76102,817-820-0682,4251246,1003,Ft Worth
+VA1,3036,"Tervis Factory Store - Virginia Beach, VA",312 Laskin Road,The Shops at 31 Ocean,Virginia Beach,VA,23451,757-422-0219,1370071,1003,Virginia Beach
+VA2,3038,"Tervis Factory Store - Williamsburg, VA",4470 Prince George St,Shop D,Williamsburg,VA,23185,757-229-0907,1405591,4004,Williamsburg
+FL0,1000,"Tervis Headquarters - Nokomis, FL",201 Triple Diamond Blvd,,Nokomis,FL,34275,941-966-2114,,,
+K02,3009,"Tervis Kiosk - Brandon, FL",932 Brandon Town Center Drive,Space R046Z,Brandon,FL,33511,,27773921,1003,
+FL17,,Tervis Pop Up Store - Ellenton Outlet Mall,5422 Factory Shops Blvd,Unit 130,Ellenton,FL,34222,,27780521,1003,
+K08,,"Tervis Kiosk - Palm Beach, FL",1751 Palm Beach Lakes Blvd,Space PC02,West Palm Beach,FL,33401,,27774428,1003,
+FL16,,"Tervis Factory Store - Coconut Point, FL",23151 Fashion Drive,Suite 109,Estero,FL,33928,239-221-5290,27732679,1003,Estero

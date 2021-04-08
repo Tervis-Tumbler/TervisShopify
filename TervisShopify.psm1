@@ -460,7 +460,8 @@ function Invoke-TervisShopifyContinuousUpdate {
 function Get-TervisShopifyLocationDefinition {
     param (
         [Parameter(ParameterSetName="City")]$City,
-        [Parameter(ParameterSetName="Name")]$Name
+        [Parameter(ParameterSetName="Name")]$Name,
+        [Parameter(ParameterSetName="All")][switch]$All
     )
     
     $ModulePath = if ($PSScriptRoot) {
@@ -473,7 +474,10 @@ function Get-TervisShopifyLocationDefinition {
         $LocationDefinition | Where-Object City -EQ $City
     } elseif ($Name) {
         $LocationDefinition | Where-Object Description -EQ $Name
-    } else {
+    } elseif ($All) {
+        $LocationDefinition
+    }
+    else {
         $Online = $LocationDefinition | Where-Object Subinventory -EQ "FL1"
         $Online.Description = "Online"
         $Online
