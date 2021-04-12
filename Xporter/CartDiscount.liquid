@@ -1,0 +1,169 @@
+{% assign line_item_discounted_price = 0 %}
+{% for item in order.line_items %}
+{% assign line_item_discounted_price = line_item_discounted_price + (item.price * item.quantity) - item.total_discount %}
+{% endfor %}
+{{ line_item_discounted_price - order.subtotal_price }}
+
+<!-- Get discount, regardless of cart or line  -->
+
+{% if discount_application.target_selection == 'all' %}
+    {% assign line_item_discounted_price = 0 %}
+    {% for item in order.line_items %}
+        {% assign line_item_discounted_price = line_item_discounted_price + (item.price * item.quantity) - item.total_discount %}
+    {% endfor %}
+    {{- line_item_discounted_price - order.subtotal_price | money -}}
+{% elsif discount_application.target_selection == 'explicit' %}
+    {{- discount_application.value | money -}}
+{% endif %}
+
+<!-- Get filtered location name -->
+
+{% assign locName = order.line_items.first.origin_location.name %}{{ locName | split: ' - ' | first }}
+
+
+<!-- other stuff -->
+
+{% if discount_application.target_selection == 'all' %}Cart{% elsif discount_application.target_selection == 'explicit' %}Line{% endif %}
+
+{% if discount_application.target_selection == 'all' %}{% assign line_item_discounted_price = 0 %}{% for item in order.line_items %}{% assign line_item_discounted_price = line_item_discounted_price + (item.price * item.quantity) - item.total_discount %}{% endfor %}{{ line_item_discounted_price - order.subtotal_price | money }}{% elsif discount_application.target_selection == 'explicit' %}{{ discount_application.value | money }}{% endif %}
+
+<!-- Line Item Discount Title -->
+{% assign discountApplications = order.discount_applications %}
+{% assign discountAllocations = line_item.discount_allocations %}
+{% assign selectedApplication = discountApplications[discountAllocations[0].discount_application_index] %}
+{% if selectedApplication.target_selection == 'explicit' %}
+{{ selectedApplication.title }}
+{% endif %}
+<!-- if allocation is line item discount, return name -->
+
+{% assign discountApplications = order.discount_applications %}{% assign discountAllocations = line_item.discount_allocations %}{{ discountApplications[discountAllocations[0].discount_application_index].title }}
+
+
+<!-- Add liquid row for cart discount -->
+<!-- 
+order 
+location
+sku
+title 
+-->
+{{ order.discount_codes[0].code }}
+{{ order.discount_codes[0].amount }}
+
+
+
+
+<!-- Get net sale by line  -->
+{% assign lineSubtotal = line_item.total_price %}
+{% assign discountAllocations = line_item.discount_allocations %}
+{% assign discountTotal = 0 %}
+{{ lineSubtotal - discountAllocations[0].amount - discountAllocations[1].amount }}
+
+{% assign lineSubtotal = line_item.total_price %}{% assign discountAllocations = line_item.discount_allocations %}{% assign discountTotal = 0 %}{{ lineSubtotal - discountAllocations[0].amount - discountAllocations[1].amount }}
+
+<!-- Line item filter Liquid -->
+{{- line_item.discount_allocations[0] != nil -}}
+
+
+<!-- Date filter to grab orders from the past day or refunds from past 30 days-->
+{% assign currentTime = now | date: '%s' %}
+{% assign yesterday = currentTime - 86400 %}
+{% assign past60days = currentTime - 5184000 %}
+{% assign created = order.created_at | date: '%s' %}
+{% assign refunds = order.refunds %}
+{% if (created > yesterday) or (refunds[0] and created > past60days) or (refunds[1] and created > past60days) or (refunds[2] and created > past60days) or (refunds[3] and created > past60days) or (refunds[4] and created > past60days) %}X{% endif %}
+
+
+{% assign currentTime = now | date: '%s' %}{% assign yesterday = currentTime - 86400 %}{% assign past60days = currentTime - 5184000 %}{% assign created = order.created_at | date: '%s' %}{% assign refunds = order.refunds %}{% if (created > yesterday) or (refunds[0] and created > past60days) or (refunds[1] and created > past60days) or (refunds[2] and created > past60days) or (refunds[3] and created > past60days) or (refunds[4] and created > past60days) %}X{% endif %}
+
+REFUNDS AS ADJUSTED ORIGINAL SALES
+
+Get total line items after return
+{% assign count = 0 %}
+{% assign totalQuantity = 0 %}
+{% for refund in order.refunds %}
+{% for line in refund.refund_line_items %}
+{% assign count = count | plus: line.quantity %}
+{% endfor %}
+{% endfor %}
+{{ order.total_quantity - count }}
+
+single line
+{% assign count = 0 %}{% assign totalQuantity = 0 %}{% for refund in order.refunds %}{% for line in refund.refund_line_items %}{% assign count = count | plus: line.quantity %}{% endfor %}{% endfor %}{{ order.total_quantity - count }}
+
+
+Get true subtotal (sum of line item prices - cart discount - sum of refund line item subtotals )
+{% assign refundedSubtotal = 0 %}
+{% for refund in order.refunds %}
+{% for line in refund.refund_line_items %}
+{% assign refundedSubtotal = refundedSubtotal | plus: line.subtotal %}
+{% endfor %}
+{% endfor %}
+{{ order.subtotal_price - refundedSubtotal | round: 2 }}
+
+single line
+{% assign refundedSubtotal = 0 %}{% for refund in order.refunds %}{% for line in refund.refund_line_items %}{% assign refundedSubtotal = refundedSubtotal | plus: line.subtotal %}{% endfor %}{% endfor %}{{ order.subtotal_price - refundedSubtotal | round: 2 }}
+
+
+Location ID
+{% if order.location_id %}
+    {{ order.location_id }}
+{% else %}
+    33937326115
+{% endif %}
+
+single line
+{% if order.location_id %}{{ order.location_id }}{% else %}33937326115{% endif %}
+
+
+REFUND AS SEPARATE TRANSACTION
+- We'll have to manually check for refunds. Realistically shouldn't have more than a few.
+{% if order.refunds[0] %}
+R1
+{% endif %}
+{% if order.refunds[1] %}
+R2
+{% endif %}
+
+- Get subtotal for items in particular refund 
+{% for line in order.refunds[0].refund_line_items %}
+{% assign refundedSubtotal = refundedSubtotal | plus: line.subtotal %}
+{% endfor %}
+{{ 0 - refundedSubtotal | round:2 }}
+
+- Get quantity of items refunded
+{% for line in order.refunds[0].refund_line_items %}
+{% assign count = count | plus: line.quantity %}
+{% endfor %}
+{{ 0 - count | round }}
+
+<!-- 
+Aorder-id
+Order ID
+Border-liquid_field_0
+Location
+Corder-line_items-sku
+Line SKU
+Dorder-line_items-title
+Line Title
+Eorder-discount_applications-title
+Discount Title
+Forder-discount_applications-liquid_field_1
+Type
+Gorder-discount_applications-liquid_field_2
+Amount
+Horder-line_items-total_discount
+Line Total Discount
+Iorder-line_items-liquid_field_3
+Line Discount Title
+
+Discount Application field 1:
+{% if discount_application.target_selection == 'all' %}Cart{% elsif discount_application.target_selection == 'explicit' %}Line{% endif %}
+Discount Application field 2:
+{% if discount_application.target_selection == 'all' %}{% assign line_item_discounted_price = 0 %}{% for item in order.line_items %}{% assign line_item_discounted_price = line_item_discounted_price + (item.price * item.quantity) - item.total_discount %}{% endfor %}{{ line_item_discounted_price - order.subtotal_price | money }}{% elsif discount_application.target_selection == 'explicit' %}{{ discount_application.value | money }}{% endif %} -->
+
+
+
+{% for line in order.refunds[0].refund_line_items %}{% assign refundedSubtotal = refundedSubtotal | plus: line.subtotal %}{% endfor %}{{ 0 - refundedSubtotal | round:2 }}
+{% for line in order.refunds[0].refund_line_items %}{% assign count = count | plus: line.quantity %}{% endfor %}{{ 0 - count | round }}
+
+{}
