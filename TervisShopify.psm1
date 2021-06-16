@@ -518,7 +518,6 @@ function Add-TervisShopifyCartDiscountAsLineItem {
     process {
         if (-not $Order.cartDiscountAmountSet) { return }
         $DiscountSku = "1373422"
-        # $DiscountSku = "1371644" # Uncomment for SIT until next refresh after 07-2020
         $DiscountName = $Order.discountCode
         $DiscountAmount = [decimal]$Order.cartDiscountAmountSet.shopMoney.amount * -1
         $Order.lineItems.edges += [PSCustomObject]@{
