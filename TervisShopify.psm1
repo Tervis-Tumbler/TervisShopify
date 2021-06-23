@@ -490,7 +490,7 @@ function Get-TervisShopifyOrdersForImport {
         [Parameter(ValueFromPipeline)]$Orders
     )
     if (-not $Orders) {
-        $Orders = Get-ShopifyOrders -ShopName $ShopName -QueryString "NOT tag:ImportedToEBS NOT tag:IgnoreImport" #Omit exchanges
+        $Orders = Get-ShopifyOrders -ShopName $ShopName -QueryString "NOT tag:ImportedToEBS NOT tag:IgnoreImport NOT tag:NeedsReview" #Omit exchanges
     }
     $Orders | ForEach-Object {
         $LocationDefinition = Get-TervisShopifyLocationDefinition -Name $_.physicalLocation.name
