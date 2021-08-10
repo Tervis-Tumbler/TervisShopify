@@ -504,8 +504,7 @@ function Get-TervisShopifyOrdersForImport {
         $_ | Add-Member -MemberType NoteProperty -Name ReceiptMethodId -Value $LocationDefinition.ReceiptMethodId -Force
         $_ | Add-Member -MemberType NoteProperty -Name CustomAttributes -Value $CustomAttributes -Force
         $_ | Add-Member -MemberType NoteProperty -Name IsOnlineOrder -Value $IsOnlineOrder -Force
-        $_ | Select-TervisShopifyOrderPersonalizationLines | Add-TervisShopifyOrderPersonalizationSKU
-        $_ | Set-TervisShopifyOrderPersonalizedItemNumber 
+        $_ | Set-TervisShopifyOrderPersonalizedItemNumber
         $_ | Add-TervisShopifyCartDiscountAsLineItem
     }
     return $Orders
@@ -574,7 +573,6 @@ function Get-TervisShopifyOrdersWithRefundPending {
             $Refund | Add-Member -MemberType NoteProperty -Name RefundID -Value $RefundID
             $Refund | Add-Member -MemberType NoteProperty -Name RefundTag -Value "Refund_$RefundID"
             $Refund | Add-Member -MemberType NoteProperty -Name Order -Value $Order
-            $Refund | Select-TervisShopifyOrderPersonalizationLines | Add-TervisShopifyOrderPersonalizationSKU
 
             $Refunds += $Refund
         }
