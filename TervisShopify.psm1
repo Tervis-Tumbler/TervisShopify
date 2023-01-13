@@ -493,19 +493,25 @@ function Get-TervisShopifyOrdersForImport {
         $Orders = Get-ShopifyOrders -ShopName $ShopName -QueryString "NOT tag:ImportedToEBS NOT tag:IgnoreImport NOT tag:NeedsReview" #Omit exchanges
     }
     $Orders | ForEach-Object {
-        $LocationDefinition = Get-TervisShopifyLocationDefinition -Name $_.physicalLocation.name
-        $IsOnlineOrder = if (-not $_.physicalLocation) { $true } else { $false }
-        $OrderId = $_.id | Get-ShopifyIdFromShopifyGid
-        $EBSDocumentReference = "$($LocationDefinition.Subinventory)-$OrderId"
-        $CustomAttributes = $_ | Convert-TervisShopifyCustomAttributesToObject
-        $_ | Add-Member -MemberType NoteProperty -Name EBSDocumentReference -Value $EBSDocumentReference -Force
-        $_ | Add-Member -MemberType NoteProperty -Name StoreCustomerNumber -Value $LocationDefinition.CustomerNumber -Force
-        $_ | Add-Member -MemberType NoteProperty -Name Subinventory -Value $LocationDefinition.Subinventory -Force
-        $_ | Add-Member -MemberType NoteProperty -Name ReceiptMethodId -Value $LocationDefinition.ReceiptMethodId -Force
-        $_ | Add-Member -MemberType NoteProperty -Name CustomAttributes -Value $CustomAttributes -Force
-        $_ | Add-Member -MemberType NoteProperty -Name IsOnlineOrder -Value $IsOnlineOrder -Force
-        $_ | Set-TervisShopifyOrderPersonalizedItemNumber
-        $_ | Add-TervisShopifyCartDiscountAsLineItem
+        try {
+            $LocationDefinition = Get-TervisShopifyLocationDefinition -Name $_.physicalLocation.name
+            $IsOnlineOrder = if (-not $_.physicalLocation) { $true } else { $false }
+            $OrderId = $_.id | Get-ShopifyIdFromShopifyGid
+            $EBSDocumentReference = "$($LocationDefinition.Subinventory)-$OrderId"
+            $CustomAttributes = $_ | Convert-TervisShopifyCustomAttributesToObject
+            $_ | Add-Member -MemberType NoteProperty -Name EBSDocumentReference -Value $EBSDocumentReference -Force
+            $_ | Add-Member -MemberType NoteProperty -Name StoreCustomerNumber -Value $LocationDefinition.CustomerNumber -Force
+            $_ | Add-Member -MemberType NoteProperty -Name Subinventory -Value $LocationDefinition.Subinventory -Force
+            $_ | Add-Member -MemberType NoteProperty -Name ReceiptMethodId -Value $LocationDefinition.ReceiptMethodId -Force
+            $_ | Add-Member -MemberType NoteProperty -Name CustomAttributes -Value $CustomAttributes -Force
+            $_ | Add-Member -MemberType NoteProperty -Name IsOnlineOrder -Value $IsOnlineOrder -Force
+            $_ | Set-TervisShopifyOrderPersonalizedItemNumber
+            $_ | Add-TervisShopifyCartDiscountAsLineItem
+        } catch {
+            $Order | Set-ShopifyOrderTag -ShopName $ShopName -AddTag "NeedsReview" | Out-Null
+            Write-EventLog -LogName Shopify -Source "Order Interface" -EntryType Error -EventId 2 `
+                -Message "Something went wrong importing Shopify order #$($Order.legacyResourceId). Reason:`n$_`n$($_.InvocationInfo.PositionMessage)" 
+        }
     }
     return $Orders
 }
