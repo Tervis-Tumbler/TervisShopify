@@ -493,6 +493,7 @@ function Get-TervisShopifyOrdersForImport {
         $Orders = Get-ShopifyOrders -ShopName $ShopName -QueryString "NOT tag:ImportedToEBS NOT tag:IgnoreImport NOT tag:NeedsReview" #Omit exchanges
     }
     $Orders | ForEach-Object {
+        $Order = $_
         try {
             $LocationDefinition = Get-TervisShopifyLocationDefinition -Name $_.physicalLocation.name
             $IsOnlineOrder = if (-not $_.physicalLocation) { $true } else { $false }
