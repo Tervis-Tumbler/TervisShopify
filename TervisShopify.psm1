@@ -12,9 +12,10 @@ function Invoke-TervisShopifyModuleImport {
 function Set-TervisShopifyEnvironment {
     param (
         [Parameter(Mandatory)]
-        [ValidateSet("Delta","Epsilon","Production")]$Environment
+        [ValidateSet("Dev","Delta","Epsilon","Production")]$Environment
     )
     $GUID = @{
+        Dev = "f6d69535-2c95-4f7e-a153-bcc299b40fdd"
         Delta = "a66d6cd9-a055-46be-ae5b-9e29a6832811"
         Epsilon = "c1ad053e-6f3e-410d-81f6-b2754b974db4"
         Production = "37d9d606-4d1b-49ae-8f89-c0d06c421345"
